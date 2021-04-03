@@ -27,7 +27,7 @@ namespace YouTubeChatBot.Services
         public async Task<NetResponse> Request(Uri url, RequestMethod method = RequestMethod.GET, IDictionary<string, string> headers = null, byte[] body = null)
         {
 
-            client.DefaultRequestHeaders.Clear();
+            client.DefaultRequestHeaders.Clear(); // we re using a single httpClient | for that we must clear DefaultRequestHeaders
 
             if (headers != null && headers.Count > 0)
             {
