@@ -25,40 +25,88 @@ namespace YouTubeChatBot.Services
 
         public async Task<Response> Request(Uri url, RequestMethod method = RequestMethod.GET, IDictionary<string, string> headers = null, byte[] body = null)
         {
+            string finalUri;
+
             switch (method)
             {
                 case RequestMethod.DELETE:
-                    break;
-                case RequestMethod.GET:
-
-                    string finalUri;
-                    if (headers.Count > 0 && headers != null)
                     {
-                        var builder = new StringBuilder($"{url}?");
-                        
-                        foreach (var header in headers)
+                        if (headers.Count > 0 && headers != null)
                         {
-                            builder.Append($"{header.Key}={header.Value}&"); // Query string
+                            var builder = new StringBuilder($"{url}?");
+
+                            foreach (var header in headers)
+                            {
+                                builder.Append($"{header.Key}={header.Value}&"); // Query string
+                            }
+
+                            builder.Remove(builder.Length - 1, 1); // Remove last &
+
+                            finalUri = builder.ToString();
                         }
-                        
-                        builder.Remove(builder.Length - 1, 1); // Remove last &
+                        else
+                        {
+                            finalUri = url.ToString();
+                        }
 
-                        finalUri = builder.ToString();
+                        var res = await client.DeleteAsync(finalUri);
+
+                        var bytes = await res.Content.ReadAsByteArrayAsync();
+
+                        return new Response(bytes, (int)res.StatusCode);
                     }
-                    else
+                case RequestMethod.GET:
                     {
-                        finalUri = url.ToString();
+                        if (headers.Count > 0 && headers != null)
+                        {
+                            var builder = new StringBuilder($"{url}?");
+
+                            foreach (var header in headers)
+                            {
+                                builder.Append($"{header.Key}={header.Value}&"); // Query string
+                            }
+
+                            builder.Remove(builder.Length - 1, 1); // Remove last &
+
+                            finalUri = builder.ToString();
+                        }
+                        else
+                        {
+                            finalUri = url.ToString();
+                        }
+
+                        var res = await client.GetAsync(finalUri);
+
+                        var bytes = await res.Content.ReadAsByteArrayAsync();
+
+                        return new Response(bytes, (int)res.StatusCode);
                     }
-                    
-                    var res = await client.GetAsync(finalUri);
-                    
-                    var bytes = await res.Content.ReadAsByteArrayAsync();
-
-                    return new Response(bytes, (int)res.StatusCode);
-                
                 case RequestMethod.PATCH:
+                    {
+                        if (headers.Count > 0 && headers != null)
+                        {
+                            var builder = new StringBuilder($"{url}?");
 
-                    break;
+                            foreach (var header in headers)
+                            {
+                                builder.Append($"{header.Key}={header.Value}&"); // Query string
+                            }
+
+                            builder.Remove(builder.Length - 1, 1); // Remove last &
+
+                            finalUri = builder.ToString();
+                        }
+                        else
+                        {
+                            finalUri = url.ToString();
+                        }
+
+                        var res = await client.PatchAsync(finalUri,);
+
+                        var bytes = await res.Content.ReadAsByteArrayAsync();
+
+                        return new Response(bytes, (int)res.StatusCode);
+                    }
                 case RequestMethod.POST:
 
                     break;
