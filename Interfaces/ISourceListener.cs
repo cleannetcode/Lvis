@@ -5,10 +5,11 @@ using YouTubeChatBot.Models;
 
 namespace YouTubeChatBot.Interfaces
 {
-    //impl: Tconf - YouTubeConf, TMess - MessageResponse
-    interface ISourceListener<TConf, TMess> : IDisposable
+    //impl: TConf - YouTubeConf, TMess - MessageResponse
+    interface ISourceListener<TConf, TMess, TStat> : IDisposable
     {
         event Action<TMess> MessageEvent;
+        event Action<TStat> StatusEvent;
         void Run(TConf configuration);
     }
 }

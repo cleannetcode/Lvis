@@ -6,5 +6,6 @@ namespace YouTubeChatBot
 {
     class DICargo
     {
+
     }
 }
