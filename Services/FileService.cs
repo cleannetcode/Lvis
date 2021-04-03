@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.IO;
 
 namespace YouTubeChatBot.Services
 {
@@ -9,7 +10,7 @@ namespace YouTubeChatBot.Services
     {
         public void Write(string source, string path)
         {
-            File.WriteAllText(source, path);
+            File.WriteAllText(path, source);
         }
         public string Read(string path)
         {
