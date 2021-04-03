@@ -25,57 +25,30 @@ namespace YouTubeChatBot.Services
 
         public async Task<Response> Request(Uri url, RequestMethod method = RequestMethod.GET, IDictionary<string, string> headers = null, byte[] body = null)
         {
-            string finalUri;
+
+            client.DefaultRequestHeaders.Clear();
+
+            if (headers != null && headers.Count > 0)
+            {
+                foreach (var header in headers)
+                {
+                    client.DefaultRequestHeaders.Add(header.Key, header.Value);
+                }
+            }
 
             switch (method)
             {
                 case RequestMethod.DELETE:
                     {
-                        if (headers.Count > 0 && headers != null)
-                        {
-                            var builder = new StringBuilder($"{url}?");
-
-                            foreach (var header in headers)
-                            {
-                                builder.Append($"{header.Key}={header.Value}&"); // Query string
-                            }
-
-                            builder.Remove(builder.Length - 1, 1); // Remove last &
-
-                            finalUri = builder.ToString();
-                        }
-                        else
-                        {
-                            finalUri = url.ToString();
-                        }
-
-                        var res = await client.DeleteAsync(finalUri);
-
+                        var res = await client.DeleteAsync(url);
+                        
                         var bytes = await res.Content.ReadAsByteArrayAsync();
-
+                        
                         return new Response(bytes, (int)res.StatusCode);
                     }
                 case RequestMethod.GET:
                     {
-                        if (headers.Count > 0 && headers != null)
-                        {
-                            var builder = new StringBuilder($"{url}?");
-
-                            foreach (var header in headers)
-                            {
-                                builder.Append($"{header.Key}={header.Value}&"); // Query string
-                            }
-
-                            builder.Remove(builder.Length - 1, 1); // Remove last &
-
-                            finalUri = builder.ToString();
-                        }
-                        else
-                        {
-                            finalUri = url.ToString();
-                        }
-
-                        var res = await client.GetAsync(finalUri);
+                        var res = await client.GetAsync(url);
 
                         var bytes = await res.Content.ReadAsByteArrayAsync();
 
@@ -83,36 +56,34 @@ namespace YouTubeChatBot.Services
                     }
                 case RequestMethod.PATCH:
                     {
-                        if (headers.Count > 0 && headers != null)
-                        {
-                            var builder = new StringBuilder($"{url}?");
-
-                            foreach (var header in headers)
-                            {
-                                builder.Append($"{header.Key}={header.Value}&"); // Query string
-                            }
-
-                            builder.Remove(builder.Length - 1, 1); // Remove last &
-
-                            finalUri = builder.ToString();
-                        }
-                        else
-                        {
-                            finalUri = url.ToString();
-                        }
-
-                        var res = await client.PatchAsync(finalUri,);
+                        ByteArrayContent byteContent = new ByteArrayContent(body);
+                        
+                        var res = await client.PatchAsync(url, byteContent);
 
                         var bytes = await res.Content.ReadAsByteArrayAsync();
 
                         return new Response(bytes, (int)res.StatusCode);
                     }
                 case RequestMethod.POST:
+                    {
+                        ByteArrayContent byteContent = new ByteArrayContent(body);
 
-                    break;
+                        var res = await client.PostAsync(url, byteContent);
+
+                        var bytes = await res.Content.ReadAsByteArrayAsync();
+
+                        return new Response(bytes, (int)res.StatusCode);
+                    }
                 case RequestMethod.PUT:
+                    {
+                        ByteArrayContent byteContent = new ByteArrayContent(body);
 
-                    break;
+                        var res = await client.PutAsync(url, byteContent);
+
+                        var bytes = await res.Content.ReadAsByteArrayAsync();
+
+                        return new Response(bytes, (int)res.StatusCode);
+                    }
                 default:
                     //throw new HttpRequestException("Invalid Request");
                     break;
