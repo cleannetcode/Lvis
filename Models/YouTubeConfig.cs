@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace YouTubeChatBot.YouTube
+namespace YouTubeChatBot.Models
 {
-    class Auntification
+    class YouTubeConfig
     {
 
     }

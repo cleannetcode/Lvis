@@ -6,5 +6,6 @@ namespace YouTubeChatBot.Models
 {
     class Configuration
     {
+
     }
 }
