@@ -6,7 +6,7 @@ namespace YouTubeChatBot.Models
 {
     class YouTubeConfig
     {
-        public string VideoID { get; set; }
+        public string ChannelID { get; set; }
         public long UpdateMs { get; set; }
     }
 }
