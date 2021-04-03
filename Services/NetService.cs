@@ -25,36 +25,50 @@ namespace YouTubeChatBot.Services
 
         public async Task<Response> Request(Uri url, RequestMethod method = RequestMethod.GET, IDictionary<string, string> headers = null, byte[] body = null)
         {
-            if (headers != null)
+            switch (method)
             {
-                foreach (var header in headers)
-                {
-                    switch (header.Key.ToString())
+                case RequestMethod.DELETE:
+                    break;
+                case RequestMethod.GET:
+
+                    string finalUri;
+                    if (headers.Count > 0 && headers != null)
                     {
-                        case "DELETE":
+                        var builder = new StringBuilder($"{url}?");
+                        
+                        foreach (var header in headers)
+                        {
+                            builder.Append($"{header.Key}={header.Value}&"); // Query string
+                        }
+                        
+                        builder.Remove(builder.Length - 1, 1); // Remove last &
 
-                            break;
-                        case "GET":
-                            var res = await client.GetAsync(header.Key);
-                            Response response = new Response(body, (int)res.StatusCode);
-                            return response;
-                        case "PATCH":
-
-                            break;
-                        case "POST":
-
-                            break;
-                        case "PUT":
-
-                            break;
-                        default:
-                            //throw new HttpRequestException("Invalid Request");
-                            break;
+                        finalUri = builder.ToString();
                     }
-                }
+                    else
+                    {
+                        finalUri = url.ToString();
+                    }
+                    
+                    var res = await client.GetAsync(finalUri);
+                    
+                    var bytes = await res.Content.ReadAsByteArrayAsync();
+
+                    return new Response(bytes, (int)res.StatusCode);
+                
+                case RequestMethod.PATCH:
+
+                    break;
+                case RequestMethod.POST:
+
+                    break;
+                case RequestMethod.PUT:
+
+                    break;
+                default:
+                    //throw new HttpRequestException("Invalid Request");
+                    break;
             }
         }
-
-
     }
 }
