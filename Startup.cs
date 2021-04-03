@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using YouTubeChatBot.Modules;
 using YouTubeChatBot.Managers;
+using YouTubeChatBot.Services;
 
 namespace YouTubeChatBot
 {
@@ -14,7 +15,11 @@ namespace YouTubeChatBot
         }
         public void AddServices(DICargo services)
         {
-            services.RegisterSingleton<ModuleManager<Y>>()
+            services.RegisterSingleton<ConfigurationService>();
+            services.RegisterSingleton<FileService>();
+            services.RegisterSingleton<NetService>();
+            services.RegisterSingleton<SerializeService>();
+            services.RegisterSingleton(b => new TimeService(b.GetObject<ConfigurationService>()));
         }
     }
 }
