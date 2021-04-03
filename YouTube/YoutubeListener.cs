@@ -11,7 +11,7 @@ using YouTubeChatBot.Services;
 
 namespace YouTubeChatBot.YouTube
 {
-    class YoutubeListener : ISourceListener<YouTubeConfig, YTMessageResponse>
+    class YoutubeListener : ISourceListener<YouTubeConfig, YTMessageResponse, StatusResponse>
     {
         private readonly NetService service;
         private CancellationTokenSource canceller;
@@ -41,7 +41,7 @@ namespace YouTubeChatBot.YouTube
         {
             const string begin = "window[\"ytInitialData\"] = ";
             const string end = ";</script>";
-            NetService.Response response = await service.Request(url, NetService.RequestMethod.GET, new Dictionary<string, string>()
+            NetResponse response = await service.Request(url, NetService.RequestMethod.GET, new Dictionary<string, string>()
             {
                 ["useragent"] = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36",
             });

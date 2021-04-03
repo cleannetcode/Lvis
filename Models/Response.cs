@@ -1,10 +1,10 @@
-﻿namespace YouTubeChatBot.Services
+﻿namespace YouTubeChatBot.Models
 {
-    public class Response
+    public class NetResponse
     {
         public readonly byte[] Data;
         public readonly int StatusCode;
-        public Response(byte[] data,int statusCode)
+        public NetResponse(byte[] data, int statusCode)
         {
             Data = data;
             StatusCode = statusCode;

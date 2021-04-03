@@ -7,10 +7,11 @@ using System.IO;
 using System.Threading.Tasks;
 using System.Threading;
 using Newtonsoft.Json;
+using YouTubeChatBot.Models;
 
 namespace YouTubeChatBot.Services
 {
-    class NetService
+    partial class NetService
     {
         private readonly HttpClient client;
 
@@ -23,7 +24,7 @@ namespace YouTubeChatBot.Services
             PUT,
         }
 
-        public async Task<Response> Request(Uri url, RequestMethod method = RequestMethod.GET, IDictionary<string, string> headers = null, byte[] body = null)
+        public async Task<NetResponse> Request(Uri url, RequestMethod method = RequestMethod.GET, IDictionary<string, string> headers = null, byte[] body = null)
         {
 
             client.DefaultRequestHeaders.Clear();
@@ -44,7 +45,7 @@ namespace YouTubeChatBot.Services
                         
                         var bytes = await res.Content.ReadAsByteArrayAsync();
                         
-                        return new Response(bytes, (int)res.StatusCode);
+                        return new NetResponse(bytes, (int)res.StatusCode);
                     }
                 case RequestMethod.GET:
                     {
@@ -52,7 +53,7 @@ namespace YouTubeChatBot.Services
 
                         var bytes = await res.Content.ReadAsByteArrayAsync();
 
-                        return new Response(bytes, (int)res.StatusCode);
+                        return new NetResponse(bytes, (int)res.StatusCode);
                     }
                 case RequestMethod.PATCH:
                     {
@@ -62,7 +63,7 @@ namespace YouTubeChatBot.Services
 
                         var bytes = await res.Content.ReadAsByteArrayAsync();
 
-                        return new Response(bytes, (int)res.StatusCode);
+                        return new NetResponse(bytes, (int)res.StatusCode);
                     }
                 case RequestMethod.POST:
                     {
@@ -72,7 +73,7 @@ namespace YouTubeChatBot.Services
 
                         var bytes = await res.Content.ReadAsByteArrayAsync();
 
-                        return new Response(bytes, (int)res.StatusCode);
+                        return new NetResponse(bytes, (int)res.StatusCode);
                     }
                 case RequestMethod.PUT:
                     {
@@ -82,11 +83,10 @@ namespace YouTubeChatBot.Services
 
                         var bytes = await res.Content.ReadAsByteArrayAsync();
 
-                        return new Response(bytes, (int)res.StatusCode);
+                        return new NetResponse(bytes, (int)res.StatusCode);
                     }
                 default:
-                    //throw new HttpRequestException("Invalid Request");
-                    break;
+                    throw new HttpRequestException($"{method} - Invalid Request");
             }
         }
     }
