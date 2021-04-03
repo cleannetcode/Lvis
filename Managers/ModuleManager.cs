@@ -10,18 +10,12 @@ namespace YouTubeChatBot.Managers
     {
         Dictionary<TPrefix, (IActionModule<TMessMod> Item, Func<IActionModule<TMessMod>> Build)> actionModules;
         ISourceListener<TListenerConf, TMessMod, TStatMod>[] sourceListeners;
-        Func<TMessMod, TPrefix> GetPrefix;
-        public ModuleManager(Func<TMessMod, TPrefix> toPrefix, params ISourceListener<TListenerConf, TMessMod, TStatMod>[] listeners)
+        public ModuleManager(params ISourceListener<TListenerConf, TMessMod, TStatMod>[] listeners)
         {
-            if (toPrefix == null)
-            {
-                throw new ArgumentNullException(nameof(toPrefix));
-            }
             if (listeners == null || listeners.Length <= 0)
             {
                 throw new ArgumentException($"{nameof(listeners)} cant be null or empty");
             }
-            GetPrefix = toPrefix;
             ListenersManage(l => 
             {
                 l.MessageEvent += MessageUpdate;
@@ -38,6 +32,7 @@ namespace YouTubeChatBot.Managers
         private void MessageUpdate(TMessMod mess)
         {
             var prefix = GetPrefix(mess);
+            if (prefix == null) return;
             if (actionModules.TryGetValue(prefix, out var module))
             {
                 if (module.Item == null)
@@ -45,10 +40,6 @@ namespace YouTubeChatBot.Managers
                     module.Item = module.Build();
                 }
                 module.Item.Execute(mess);
-            }
-            else
-            {
-                throw new KeyNotFoundException($"{prefix} was not found");
             }
         }
         public void AddModule<T>(TPrefix commandPrefix) where T : IActionModule<TMessMod>, new() => AddModule(commandPrefix, () => new T());
@@ -82,9 +73,8 @@ namespace YouTubeChatBot.Managers
             }
             actionModules = null;
             sourceListeners = null;
-            GetPrefix = null;
         }
-
+        protected abstract TPrefix GetPrefix(TMessMod mess);
         protected abstract void StateHandle(ISourceListener<TListenerConf, TMessMod, TStatMod> sender, TStatMod StatusModel);
     }
 }
