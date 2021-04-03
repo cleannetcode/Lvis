@@ -8,6 +8,7 @@
   <ItemGroup>
     <PackageReference Include="Google.Apis" Version="1.51.0" />
     <PackageReference Include="Google.Apis.YouTube.v3" Version="1.51.0.2238" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
   </ItemGroup>
 
   <ItemGroup>
