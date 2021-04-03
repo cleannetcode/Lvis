@@ -6,6 +6,7 @@ namespace YouTubeChatBot.Services
 {
     class ConfigurationService
     {
+        public char ChatKeySymbol { get; }
         public string DateTimeFormal { get; }
     }
 }
