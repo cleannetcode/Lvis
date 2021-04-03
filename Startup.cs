@@ -4,7 +4,7 @@ using System.Text;
 
 namespace YouTubeChatBot
 {
-    public class Configure
+    public partial class Startup
     {
         public void ConfigureModules()
         {

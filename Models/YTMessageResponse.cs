@@ -12,7 +12,8 @@ namespace YouTubeChatBot.Models
         public DateTime UtcTime { get; }
         public AuthorTypes UserType { get; }
 
-        [Flags] public enum AuthorTypes
+        [Flags] 
+        public enum AuthorTypes
         {
             None = 0,
             Other = 1 << 0,
