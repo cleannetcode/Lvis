@@ -6,6 +6,6 @@ namespace YouTubeChatBot.Models
 {
     class Configuration
     {
-
+        public YTMessageResponse YTMessageResponse { get; set; }
     }
 }

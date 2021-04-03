@@ -6,11 +6,12 @@ namespace YouTubeChatBot.Services
 {
     class TimeService
     {
+        string culture;
         public TimeService(ConfigurationService confService)
         {
 
         }
-        public string FormatActualTime { get; }
-        public DateTime ActualTime { get; }
+        public string FormatActualTime => ActualTime.ToString(culture);
+        public DateTime ActualTime => DateTime.UtcNow;
     }
 }
