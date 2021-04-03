@@ -1,0 +1,193 @@
+﻿using Newtonsoft.Json.Linq;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+using YouTubeChatBot.Interfaces;
+using YouTubeChatBot.Models;
+using YouTubeChatBot.Services;
+
+namespace YouTubeChatBot.YouTube
+{
+    class YoutubeListener : ISourceListener<YouTubeConfig, YTMessageResponse>
+    {
+        private readonly NetService service;
+        private CancellationTokenSource canceller;
+
+        public YoutubeListener(NetService service)
+        {
+            this.service = service;
+        }
+
+        public event Action<YTMessageResponse> MessageEvent;
+        public event Action<StatusResponse> StatusEvent;
+
+        public void Dispose()
+        {
+            if (canceller == null) return;
+            canceller.Cancel();
+            canceller = null;
+        }
+        public void Run(YouTubeConfig configuration)
+        {
+            if (canceller != null) canceller.Cancel();
+            canceller = new CancellationTokenSource();
+            _ = RunTask(TimeSpan.FromMilliseconds(configuration.UpdateMs), new Uri($"{'h'}ttps://www.youtube.com/live_chat?v={configuration.VideoID}"), canceller.Token);
+        }
+
+        private async Task<JObject> GetLiveChatData(Uri url)
+        {
+            const string begin = "window[\"ytInitialData\"] = ";
+            const string end = ";</script>";
+            NetService.Response response = await service.Request(url, NetService.RequestMethod.GET, new Dictionary<string, string>()
+            {
+                ["useragent"] = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36",
+            });
+            if (response.StatusCode != 200) return null;
+            string html = Encoding.Default.GetString(response.Data);
+            return JObject.Parse(html[(html.IndexOf(begin) + begin.Length)..html.IndexOf(end)]);
+        }
+        private async Task<Uri> GetFullLiveChat(Uri url)
+        {
+            JObject json = await GetLiveChatData(url);
+            string id = (json["continuationContents"]?["liveChatContinuation"] ?? json["contents"]?["liveChatRenderer"])
+                ?["header"]
+                ?["liveChatHeaderRenderer"]
+                ?["viewSelector"]
+                ?["sortFilterSubMenuRenderer"]
+                ?["subMenuItems"]
+                ?.Last
+                ?["continuation"]
+                ?["reloadContinuationData"]
+                ?["continuation"]?.Value<string>();
+            return id == null ? null : new Uri($"{'h'}ttps://www.youtube.com/live_chat?continuation={id}");
+        }
+        private async Task<JArray> GetChatMessages(Uri url)
+        {
+            JObject json = await GetLiveChatData(url);
+            if (json == null) return null;
+            JToken jtok = (json["continuationContents"]?["liveChatContinuation"] ?? json["contents"]?["liveChatRenderer"])?["actions"];
+            if (jtok == null || !(jtok is JArray jarr)) return null;
+            return jarr;
+        }
+        private async Task RunTask(TimeSpan updateTimeout, Uri liveChatUrl, CancellationToken token)
+        {
+            liveChatUrl = await GetFullLiveChat(liveChatUrl);
+            if (liveChatUrl == null)
+            {
+                StatusEvent?.Invoke(new StatusResponse(404, "LiveChat not founded"));
+                return;
+            }
+            string lastMessageID = null;
+            int errors = 0;
+            DateTime utcInit = DateTime.UtcNow;
+            while (true)
+            {
+                token.ThrowIfCancellationRequested();
+                if (errors > 10)
+                {
+                    StatusEvent?.Invoke(new StatusResponse(400, "LiveChat closed"));
+                    return;
+                }
+                await Task.Delay(updateTimeout);
+                token.ThrowIfCancellationRequested();
+                string firstMessageID = null;
+                List<YTMessageResponse> msgs = new List<YTMessageResponse>();
+                JArray chatMessages = await GetChatMessages(liveChatUrl);
+                if (chatMessages == null)
+                {
+                    errors++;
+                    continue;
+                }
+                foreach (JObject item in chatMessages.Reverse())
+                {
+                    try
+                    {
+                        if (!item.TryGetValue("addChatItemAction", out JToken chatItem)) continue;
+                        chatItem = chatItem["item"]["liveChatTextMessageRenderer"];
+                        if (chatItem == null) continue;
+
+                        string message = chatItem["message"]["runs"][0]["text"].Value<string>();
+                        string authorName = chatItem["authorName"]?["simpleText"]?.Value<string>() ?? "Unknown";
+                        string authorIcon = chatItem["authorPhoto"]?["thumbnails"]?.Last?["url"]?.Value<string>();
+                        string authorID = chatItem["authorExternalChannelId"].Value<string>();
+                        string messageID = chatItem["id"].Value<string>();
+                        long value = chatItem["timestampUsec"].Value<long>() / 1000;
+                        DateTime utcTime = DateTimeOffset.FromUnixTimeMilliseconds(value).UtcDateTime;
+                        YTMessageResponse.AuthorTypes authorType = YTMessageResponse.AuthorTypes.None;
+                        foreach (var jbd in chatItem["authorBadges"]?.ToObject<JArray>() ?? new JArray())
+                        {
+                            JObject jjbd = jbd["liveChatAuthorBadgeRenderer"]?.ToObject<JObject>();
+                            if (jjbd != null && jjbd.TryGetValue("icon", out JToken icon))
+                            {
+                                switch (icon?["iconType"]?.Value<string>())
+                                {
+                                    case "VERIFIED": authorType |= YTMessageResponse.AuthorTypes.Verified; break;
+                                    case "MODERATOR": authorType |= YTMessageResponse.AuthorTypes.Moderator; break;
+                                    case "OWNER": authorType |= YTMessageResponse.AuthorTypes.Owner; break;
+                                    default: authorType |= YTMessageResponse.AuthorTypes.Other; break;
+                                }
+                            }
+                            else authorType |= YTMessageResponse.AuthorTypes.Sponsor;
+                        }
+                        if (lastMessageID == null && utcTime < utcInit) continue;
+                        if (firstMessageID == null) firstMessageID = messageID;
+                        if (lastMessageID == messageID) break;
+                        msgs.Add(new YTMessageResponse(authorName, authorID, message, utcTime, authorType));
+                    }
+                    catch
+                    {
+
+                    }
+                }
+                msgs.Reverse();
+                foreach (var msg in msgs)
+                {
+                    token.ThrowIfCancellationRequested();
+                    MessageEvent?.Invoke(msg);
+                }
+                errors = 0;
+                lastMessageID = firstMessageID ?? lastMessageID;
+                token.ThrowIfCancellationRequested();
+            }
+        }
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
