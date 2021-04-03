@@ -8,7 +8,7 @@ namespace YouTubeChatBot.Managers
 {
     abstract class ModuleManager<TPrefix, TMessMod, TStatMod, TListenerConf> : IDisposable
     {
-        Dictionary<TPrefix, IActionModule<TMessMod>> actionModules;
+        Dictionary<TPrefix, (IActionModule<TMessMod> Item, Func<IActionModule<TMessMod>> Build)> actionModules;
         ISourceListener<TListenerConf, TMessMod, TStatMod>[] sourceListeners;
         Func<TMessMod, TPrefix> GetPrefix;
         public ModuleManager(Func<TMessMod, TPrefix> toPrefix, params ISourceListener<TListenerConf, TMessMod, TStatMod>[] listeners)
@@ -40,17 +40,29 @@ namespace YouTubeChatBot.Managers
             var prefix = GetPrefix(mess);
             if (actionModules.TryGetValue(prefix, out var module))
             {
-                module.Execute(mess);
+                if (module.Item == null)
+                {
+                    module.Item = module.Build();
+                }
+                module.Item.Execute(mess);
             }
             else
             {
-                throw new InvalidOperationException($"{prefix} was not found");
+                throw new KeyNotFoundException($"{prefix} was not found");
             }
         }
         public void AddModule<T>(TPrefix commandPrefix) where T : IActionModule<TMessMod>, new() => AddModule(commandPrefix, () => new T());
         public void AddModule(TPrefix commandPrefix, Func<IActionModule<TMessMod>> builder)
         {
-
+            if (builder == null)
+            {
+                throw new ArgumentNullException(nameof(builder));
+            }
+            if (actionModules.ContainsKey(commandPrefix))
+            {
+                throw new ArgumentException($"{commandPrefix} has already been added");
+            }
+            actionModules.Add(commandPrefix, (null, builder));
         }
         public void Run(TListenerConf config)
         {
