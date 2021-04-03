@@ -9,7 +9,7 @@ namespace YouTubeChatBot.Services
         string culture;
         public TimeService(ConfigurationService confService)
         {
-
+            culture = confService.DateTimeFormat;
         }
         public string FormatActualTime => ActualTime.ToString(culture);
         public DateTime ActualTime => DateTime.UtcNow;

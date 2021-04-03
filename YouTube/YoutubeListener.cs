@@ -34,10 +34,10 @@ namespace YouTubeChatBot.YouTube
         {
             if (canceller != null) canceller.Cancel();
             canceller = new CancellationTokenSource();
-            _ = RunTask(TimeSpan.FromMilliseconds(configuration.UpdateMs), new Uri($"{'h'}ttps://www.youtube.com/live_chat?v={configuration.VideoID}"), canceller.Token);
+            _ = RunTask(TimeSpan.FromMilliseconds(configuration.UpdateMs), new Uri($"{'h'}ttps://www.youtube.com/channel/{configuration.ChannelID}"), canceller.Token);
         }
 
-        private async Task<JObject> GetLiveChatData(Uri url)
+        private async Task<JObject> GetYoutubeData(Uri url)
         {
             const string begin = "window[\"ytInitialData\"] = ";
             const string end = ";</script>";
@@ -51,7 +51,7 @@ namespace YouTubeChatBot.YouTube
         }
         private async Task<Uri> GetFullLiveChat(Uri url)
         {
-            JObject json = await GetLiveChatData(url);
+            JObject json = await GetYoutubeData(url);
             string id = (json["continuationContents"]?["liveChatContinuation"] ?? json["contents"]?["liveChatRenderer"])
                 ?["header"]
                 ?["liveChatHeaderRenderer"]
@@ -66,14 +66,29 @@ namespace YouTubeChatBot.YouTube
         }
         private async Task<JArray> GetChatMessages(Uri url)
         {
-            JObject json = await GetLiveChatData(url);
+            JObject json = await GetYoutubeData(url);
             if (json == null) return null;
             JToken jtok = (json["continuationContents"]?["liveChatContinuation"] ?? json["contents"]?["liveChatRenderer"])?["actions"];
             if (jtok == null || !(jtok is JArray jarr)) return null;
             return jarr;
         }
-        private async Task RunTask(TimeSpan updateTimeout, Uri liveChatUrl, CancellationToken token)
+        private async Task<string> GetChannelStream(Uri url)
         {
+            JObject json = await GetYoutubeData(url);
+            foreach (JObject item in json?["contents"]?["twoColumnBrowseResultsRenderer"]?["tabs"]?[0]?["tabRenderer"]?["content"]?["sectionListRenderer"]?["contents"]?[0]?["itemSectionRenderer"]?["contents"]?[0]?["channelFeaturedContentRenderer"]?["items"] ?? new JArray())
+                if (item?["videoRenderer"]?["thumbnailOverlays"]?[0]?["thumbnailOverlayTimeStatusRenderer"]?["style"]?.Value<string>() == "LIVE")
+                    return item["videoRenderer"]["videoId"].Value<string>();
+            return null;
+        }
+        private async Task RunTask(TimeSpan updateTimeout, Uri uri, CancellationToken token)
+        {
+            string videoID = await GetChannelStream(uri);
+            if (videoID == null)
+            {
+                StatusEvent?.Invoke(new StatusResponse(404, "Stream not founded"));
+                return;
+            }
+            Uri liveChatUrl = new Uri($"{'h'}ttps://www.youtube.com/live_chat?v={videoID}");
             liveChatUrl = await GetFullLiveChat(liveChatUrl);
             if (liveChatUrl == null)
             {
@@ -83,6 +98,7 @@ namespace YouTubeChatBot.YouTube
             string lastMessageID = null;
             int errors = 0;
             DateTime utcInit = DateTime.UtcNow;
+            StatusEvent?.Invoke(new StatusResponse(200, "LiveChat starded"));
             while (true)
             {
                 token.ThrowIfCancellationRequested();
