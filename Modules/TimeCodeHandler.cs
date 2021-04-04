@@ -4,18 +4,17 @@ using System.Text;
 using YouTubeChatBot.Models;
 using YouTubeChatBot.Interfaces;
 using YouTubeChatBot.Services;
+using System.IO;
 
 namespace YouTubeChatBot.Modules
 {
-    class TimeCodeHandler : IActionModule<YTMessageResponse>
+    class TimeCodeHandler : BaseYTModule
     {
-        public TimeCodeHandler(FileService fileService, SerializeService serializeService)
+        protected override string savefileformat => "Stream[{0}]TimeCodes";
+        public TimeCodeHandler(FileService fileService, SerializeService serializeService, ConfigurationService configurationService)
+            : base(fileService, serializeService, configurationService.TimeCodeConfigure)
         {
-            
-        }
-        public void Execute(YTMessageResponse param)
-        {
-            //txt time at start / real time / name / role / message
+
         }
     }
 }
