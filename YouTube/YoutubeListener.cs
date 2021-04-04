@@ -54,10 +54,20 @@ namespace YouTubeChatBot.YouTube
         {
             const string begin = "window[\"ytInitialData\"] = ";
             const string end = ";</script>";
+            const string begin2 = "var ytInitialData = ";
+
             NetResponse response = await GetYoutubeResponse(url);
             if (response.StatusCode != 200) return null;
             string html = Encoding.Default.GetString(response.Data);
-            return JObject.Parse(html[(html.IndexOf(begin) + begin.Length)..html.IndexOf(end)]);
+            var indxStart = html.IndexOf(begin);
+
+            if (indxStart == -1) indxStart = html.IndexOf(begin2) + begin2.Length;
+            else indxStart += begin.Length;
+
+            var indxEnd = html.IndexOf(end, indxStart);
+            var text = html[indxStart..indxEnd];
+            var result = JObject.Parse(text);
+            return result;
         }
         private async Task<Uri> GetFullLiveChat(Uri url)
         {
@@ -98,138 +108,111 @@ namespace YouTubeChatBot.YouTube
             JObject json = JObject.Parse(HttpUtility.ParseQueryString(data).Get("player_response"));
             string start = json?["microformat"]?["playerMicroformatRenderer"]?["liveBroadcastDetails"]?["startTimestamp"]?.Value<string>();
             if (start == null) return DateTime.MinValue;
+            start = start.Replace(' ', '+');
             return DateTime.Parse(start).ToUniversalTime();
         }
         private async Task RunTask(TimeSpan updateTimeout, string channelID, CancellationToken token)
         {
-            string videoID = await GetChannelStream(channelID);
-            if (videoID == null)
+            try
             {
-                StatusEvent?.Invoke(new StatusResponse(404, "Stream not founded"));
-                return;
-            }
-            DateTime startTime = await GetStartDate(videoID);
-            if (startTime == DateTime.MinValue)
-            {
-                StatusEvent?.Invoke(new StatusResponse(404, "Video info not founded"));
-                return;
-            }
-            Uri liveChatUrl = YoutubeURL.GetLiveChat(videoID);
-            liveChatUrl = await GetFullLiveChat(liveChatUrl);
-            if (liveChatUrl == null)
-            {
-                StatusEvent?.Invoke(new StatusResponse(404, "LiveChat not founded"));
-                return;
-            }
-            string lastMessageID = null;
-            int errors = 0;
-            DateTime utcInit = DateTime.UtcNow;
-            StatusEvent?.Invoke(new StatusResponse(200, "LiveChat starded"));
-            while (true)
-            {
-                token.ThrowIfCancellationRequested();
-                if (errors > 10)
+
+                string videoID = await GetChannelStream(channelID);
+                if (videoID == null)
                 {
-                    StatusEvent?.Invoke(new StatusResponse(400, "LiveChat closed"));
+                    StatusEvent?.Invoke(new StatusResponse(404, "Stream not founded"));
                     return;
                 }
-                await Task.Delay(updateTimeout);
-                token.ThrowIfCancellationRequested();
-                string firstMessageID = null;
-                List<YTMessageResponse> msgs = new List<YTMessageResponse>();
-                JArray chatMessages = await GetChatMessages(liveChatUrl);
-                if (chatMessages == null)
+                DateTime startTime = await GetStartDate(videoID);
+                if (startTime == DateTime.MinValue)
                 {
-                    errors++;
-                    continue;
+                    StatusEvent?.Invoke(new StatusResponse(404, "Video info not founded"));
+                    return;
                 }
-                foreach (JObject item in chatMessages.Reverse())
+                Uri liveChatUrl = YoutubeURL.GetLiveChat(videoID);
+                liveChatUrl = await GetFullLiveChat(liveChatUrl);
+                if (liveChatUrl == null)
                 {
-                    try
-                    {
-                        if (!item.TryGetValue("addChatItemAction", out JToken chatItem)) continue;
-                        chatItem = chatItem["item"]["liveChatTextMessageRenderer"];
-                        if (chatItem == null) continue;
-
-                        string message = chatItem["message"]["runs"][0]["text"].Value<string>();
-                        string authorName = chatItem["authorName"]?["simpleText"]?.Value<string>() ?? "Unknown";
-                        string authorIcon = chatItem["authorPhoto"]?["thumbnails"]?.Last?["url"]?.Value<string>();
-                        string authorID = chatItem["authorExternalChannelId"].Value<string>();
-                        string messageID = chatItem["id"].Value<string>();
-                        long value = chatItem["timestampUsec"].Value<long>() / 1000;
-                        DateTime utcTime = DateTimeOffset.FromUnixTimeMilliseconds(value).UtcDateTime;
-                        YTMessageResponse.AuthorTypes authorType = YTMessageResponse.AuthorTypes.None;
-                        foreach (var jbd in chatItem["authorBadges"]?.ToObject<JArray>() ?? new JArray())
-                        {
-                            JObject jjbd = jbd["liveChatAuthorBadgeRenderer"]?.ToObject<JObject>();
-                            if (jjbd != null && jjbd.TryGetValue("icon", out JToken icon))
-                            {
-                                switch (icon?["iconType"]?.Value<string>())
-                                {
-                                    case "VERIFIED": authorType |= YTMessageResponse.AuthorTypes.Verified; break;
-                                    case "MODERATOR": authorType |= YTMessageResponse.AuthorTypes.Moderator; break;
-                                    case "OWNER": authorType |= YTMessageResponse.AuthorTypes.Owner; break;
-                                    default: authorType |= YTMessageResponse.AuthorTypes.Other; break;
-                                }
-                            }
-                            else authorType |= YTMessageResponse.AuthorTypes.Sponsor;
-                        }
-                        if (lastMessageID == null && utcTime < utcInit) continue;
-                        if (firstMessageID == null) firstMessageID = messageID;
-                        if (lastMessageID == messageID) break;
-                        msgs.Add(new YTMessageResponse(authorName, authorID, message, utcTime, startTime, authorType));
-                    }
-                    catch
-                    {
-
-                    }
+                    StatusEvent?.Invoke(new StatusResponse(404, "LiveChat not founded"));
+                    return;
                 }
-                msgs.Reverse();
-                foreach (var msg in msgs)
+                string lastMessageID = null;
+                int errors = 0;
+                DateTime utcInit = DateTime.UtcNow;
+                StatusEvent?.Invoke(new StatusResponse(200, "LiveChat starded"));
+                while (true)
                 {
                     token.ThrowIfCancellationRequested();
-                    MessageEvent?.Invoke(msg);
+                    if (errors > 10)
+                    {
+                        StatusEvent?.Invoke(new StatusResponse(400, "LiveChat closed"));
+                        return;
+                    }
+                    await Task.Delay(updateTimeout);
+                    token.ThrowIfCancellationRequested();
+                    string firstMessageID = null;
+                    List<YTMessageResponse> msgs = new List<YTMessageResponse>();
+                    JArray chatMessages = await GetChatMessages(liveChatUrl);
+                    if (chatMessages == null)
+                    {
+                        errors++;
+                        continue;
+                    }
+                    foreach (JObject item in chatMessages.Reverse())
+                    {
+                        try
+                        {
+                            if (!item.TryGetValue("addChatItemAction", out JToken chatItem)) continue;
+                            chatItem = chatItem["item"]["liveChatTextMessageRenderer"];
+                            if (chatItem == null) continue;
+
+                            string message = chatItem["message"]["runs"][0]["text"].Value<string>();
+                            string authorName = chatItem["authorName"]?["simpleText"]?.Value<string>() ?? "Unknown";
+                            string authorIcon = chatItem["authorPhoto"]?["thumbnails"]?.Last?["url"]?.Value<string>();
+                            string authorID = chatItem["authorExternalChannelId"].Value<string>();
+                            string messageID = chatItem["id"].Value<string>();
+                            long value = chatItem["timestampUsec"].Value<long>() / 1000;
+                            DateTime utcTime = DateTimeOffset.FromUnixTimeMilliseconds(value).UtcDateTime;
+                            YTMessageResponse.AuthorTypes authorType = YTMessageResponse.AuthorTypes.None;
+                            foreach (var jbd in chatItem["authorBadges"]?.ToObject<JArray>() ?? new JArray())
+                            {
+                                JObject jjbd = jbd["liveChatAuthorBadgeRenderer"]?.ToObject<JObject>();
+                                if (jjbd != null && jjbd.TryGetValue("icon", out JToken icon))
+                                {
+                                    switch (icon?["iconType"]?.Value<string>())
+                                    {
+                                        case "VERIFIED": authorType |= YTMessageResponse.AuthorTypes.Verified; break;
+                                        case "MODERATOR": authorType |= YTMessageResponse.AuthorTypes.Moderator; break;
+                                        case "OWNER": authorType |= YTMessageResponse.AuthorTypes.Owner; break;
+                                        default: authorType |= YTMessageResponse.AuthorTypes.Other; break;
+                                    }
+                                }
+                                else authorType |= YTMessageResponse.AuthorTypes.Sponsor;
+                            }
+                            if (lastMessageID == null && utcTime < utcInit) continue;
+                            if (firstMessageID == null) firstMessageID = messageID;
+                            if (lastMessageID == messageID) break;
+                            msgs.Add(new YTMessageResponse(authorName, authorID, message, utcTime, startTime, authorType));
+                        }
+                        catch
+                        {
+
+                        }
+                    }
+                    msgs.Reverse();
+                    foreach (var msg in msgs)
+                    {
+                        token.ThrowIfCancellationRequested();
+                        MessageEvent?.Invoke(msg);
+                    }
+                    errors = 0;
+                    lastMessageID = firstMessageID ?? lastMessageID;
+                    token.ThrowIfCancellationRequested();
                 }
-                errors = 0;
-                lastMessageID = firstMessageID ?? lastMessageID;
-                token.ThrowIfCancellationRequested();
+            }
+            catch (Exception e)
+            {
+                StatusEvent?.Invoke(new StatusResponse(401, e.ToString()));
             }
         }
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

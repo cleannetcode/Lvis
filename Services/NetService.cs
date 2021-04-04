@@ -8,13 +8,12 @@ using System.Threading.Tasks;
 using System.Threading;
 using Newtonsoft.Json;
 using YouTubeChatBot.Models;
+using System.Net.Http.Headers;
 
 namespace YouTubeChatBot.Services
 {
     partial class NetService
     {
-        private readonly HttpClient client;
-
         public enum RequestMethod
         {
             DELETE,
@@ -27,13 +26,20 @@ namespace YouTubeChatBot.Services
         public async Task<NetResponse> Request(Uri url, RequestMethod method = RequestMethod.GET, IDictionary<string, string> headers = null, byte[] body = null)
         {
 
-            client.DefaultRequestHeaders.Clear(); // we re using a single httpClient | for that we must clear DefaultRequestHeaders
+            var client = new HttpClient(); // we re using a single httpClient | for that we must clear DefaultRequestHeaders
 
             if (headers != null && headers.Count > 0)
             {
                 foreach (var header in headers)
                 {
-                    client.DefaultRequestHeaders.Add(header.Key, header.Value);
+                    switch (header.Key.ToLower())
+                    {
+                        case "accept": client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(header.Value)); break;
+                        case "host": client.DefaultRequestHeaders.Host = header.Value; break;
+                        case "authorization": client.DefaultRequestHeaders.Authorization = AuthenticationHeaderValue.Parse(header.Value); break;
+                        case "useragent": client.DefaultRequestHeaders.UserAgent.ParseAdd(header.Value); break;
+                        default: client.DefaultRequestHeaders.Add(header.Key, header.Value); break;
+                    }
                 }
             }
 

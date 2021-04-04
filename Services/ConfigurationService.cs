@@ -11,6 +11,7 @@ namespace YouTubeChatBot.Services
         public string AbsBaseFolderPath { get; }
         public SaveModuleConfiguration TimeCodeConfigure { get; }
         public SaveModuleConfiguration QuestionConfigure { get; }
+        public YouTubeConfig YouTubeConfig { get; }
         public char ChatKeySymbol { get; }
         public string DateTimeFormat { get; }
 
@@ -27,6 +28,7 @@ namespace YouTubeChatBot.Services
             QuestionConfigure = setting.QuestionConfigure;
             DateTimeFormat = setting.DateTimeFormat;
             ChatKeySymbol = setting.KeyPrefix;
+            YouTubeConfig = setting.YouTubeConfig;
         }
     }
 }
