@@ -27,7 +27,7 @@ namespace YouTubeChatBot.Modules
 
         public void Execute(YTMessageResponse param)
         {
-            var parse = param.Context.Remove(0, param.Context.IndexOf(' '));
+            var parse = param.Context.Remove(0, param.Context.IndexOf(' ') + 1);
             var model = new BaseSaveModel
             {
                 DateTime = param.UtcTime,
