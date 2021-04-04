@@ -11,11 +11,11 @@ namespace YouTubeChatBot.Modules
     {
         public TimeCodeHandler(FileService fileService, SerializeService serializeService)
         {
-             
+            
         }
         public void Execute(YTMessageResponse param)
         {
-            throw new NotImplementedException();
+            //txt time at start / real time / name / role / message
         }
     }
 }

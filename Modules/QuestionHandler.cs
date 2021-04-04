@@ -10,7 +10,7 @@ namespace YouTubeChatBot.Modules
     {
         public void Execute(YTMessageResponse param)
         {
-            throw new NotImplementedException();
+
         }
     }
 }
