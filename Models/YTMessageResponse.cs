@@ -10,6 +10,7 @@ namespace YouTubeChatBot.Models
         public string UserID { get; }
         public string Context { get; }
         public DateTime UtcTime { get; }
+        public DateTime StartStreamTime { get; }
         public AuthorTypes UserType { get; }
 
         [Flags] 
@@ -23,13 +24,14 @@ namespace YouTubeChatBot.Models
             Sponsor = 1 << 4,
         }
 
-        public YTMessageResponse(string userName, string userID, string context, DateTime utcTime, AuthorTypes userType)
+        public YTMessageResponse(string userName, string userID, string context, DateTime utcTime, DateTime startStreamTime, AuthorTypes userType)
         {
             UserName = userName;
             UserID = userID;
             Context = context;
             UtcTime = utcTime;
             UserType = userType;
+            StartStreamTime = startStreamTime;
         }
     }
 }
