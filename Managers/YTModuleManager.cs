@@ -15,7 +15,6 @@ namespace YouTubeChatBot.Managers
             Action<ModuleManager<string, YTMessageResponse, StatusResponse, YouTubeConfig>> configure) : base(configure)
         {
             keyPrefix = configurationService.ChatKeySymbol;
-            //ytConfig = 
         }
         public YTModuleManager(ConfigurationService configurationService) : this(configurationService, null) { }
         protected override string GetPrefix(YTMessageResponse mess)

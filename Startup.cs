@@ -18,8 +18,8 @@ namespace YouTubeChatBot
         }
         private void ConfigureServices(DICargo services)
         {
-            services.RegisterSingleton<ConfigurationService>();
-            services.RegisterSingleton<FileService>();
+            services.RegisterSingleton(b => new ConfigurationService(b.GetObject<SerializeService>()));
+            services.RegisterSingleton(b => new FileService(b.GetObject<ConfigurationService>()));
             services.RegisterSingleton<NetService>();
             services.RegisterSingleton<SerializeService>();
             services.RegisterSingleton(b => new TimeService(b.GetObject<ConfigurationService>()));
@@ -27,16 +27,17 @@ namespace YouTubeChatBot
             services.RegisterSingleton<ISourceListener<YouTubeConfig, YTMessageResponse, StatusResponse>, YoutubeListener>
                 (b => new YoutubeListener(b.GetObject<NetService>()));
 
-            services.RegisterSingleton<QuestionHandler>();
+            services.RegisterSingleton
+                (b => new QuestionHandler(b.GetObject<FileService>(), b.GetObject<SerializeService>(), b.GetObject<ConfigurationService>()));
 
             services.RegisterSingleton
-                (b => new TimeCodeHandler(b.GetObject<FileService>(), b.GetObject<SerializeService>()));
+                (b => new TimeCodeHandler(b.GetObject<FileService>(), b.GetObject<SerializeService>(), b.GetObject<ConfigurationService>()));
 
             services.RegisterSingleton(b => new YTModuleManager(b.GetObject<ConfigurationService>(), m =>
             {
                 m.AddListener(b.GetObject<YoutubeListener>);
-                //m.AddModule(b.GetObject<QuestionHandler>);
-                //
+                m.AddModule(b.GetObject<QuestionHandler>);
+                m.AddModule(b.GetObject<TimeCodeHandler>);
             }));
         }
     }
