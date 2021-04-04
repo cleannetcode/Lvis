@@ -5,7 +5,10 @@ namespace YouTubeChatBot
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            using (var startup = new Startup())
+            {
+                startup.Run();
+            }
         }
     }
 }

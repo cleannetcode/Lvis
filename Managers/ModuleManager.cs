@@ -9,18 +9,15 @@ namespace YouTubeChatBot.Managers
     abstract class ModuleManager<TPrefix, TMessMod, TStatMod, TListenerConf> : IDisposable
     {
         Dictionary<TPrefix, (IActionModule<TMessMod> Item, Func<IActionModule<TMessMod>> Build)> actionModules;
-        ISourceListener<TListenerConf, TMessMod, TStatMod>[] sourceListeners;
-        public ModuleManager(params ISourceListener<TListenerConf, TMessMod, TStatMod>[] listeners)
+        List<ISourceListener<TListenerConf, TMessMod, TStatMod>> sourceListeners;
+        public ModuleManager()
         {
-            if (listeners == null || listeners.Length <= 0)
-            {
-                throw new ArgumentException($"{nameof(listeners)} cant be null or empty");
-            }
-            ListenersManage(l => 
-            {
-                l.MessageEvent += MessageUpdate;
-                l.StatusEvent += (e) => StateHandle(l, e);
-            });
+            actionModules = new Dictionary<TPrefix, (IActionModule<TMessMod> Item, Func<IActionModule<TMessMod>> Build)>();
+            sourceListeners = new List<ISourceListener<TListenerConf, TMessMod, TStatMod>>();
+        }
+        public ModuleManager(Action<ModuleManager<TPrefix, TMessMod, TStatMod, TListenerConf>> configure) : this()
+        {
+            configure?.Invoke(this);
         }
         private void ListenersManage(Action<ISourceListener<TListenerConf, TMessMod, TStatMod>> listenerAction)
         {
@@ -41,6 +38,31 @@ namespace YouTubeChatBot.Managers
                 }
                 module.Item.Execute(mess);
             }
+        }
+        public void AddListener<T>() where T : ISourceListener<TListenerConf, TMessMod, TStatMod>, new() => AddListener(() => new T());
+        public void AddListener(Func<ISourceListener<TListenerConf, TMessMod, TStatMod>> listenerBuilder)
+        {
+            if (listenerBuilder == null)
+            {
+                throw new ArgumentNullException(nameof(listenerBuilder));
+            }
+            AddListener(listenerBuilder());
+        }
+        public void AddListener(ISourceListener<TListenerConf, TMessMod, TStatMod> listener)
+        {
+            if (listener == null)
+            {
+                throw new ArgumentNullException(nameof(listener));
+            }
+            sourceListeners.Add(listener);
+            listener.MessageEvent += MessageUpdate;
+            listener.StatusEvent += (e) => StateHandle(listener, e);
+        }
+        public void AddModule<T>() where T : IActionPrefixModule<TMessMod, TPrefix>, new() => AddModule(() => new T());
+        public void AddModule(Func<IActionPrefixModule<TMessMod, TPrefix>> builder)
+        {
+            var item = builder();
+            AddModule(item.Prefix, () => item);
         }
         public void AddModule<T>(TPrefix commandPrefix) where T : IActionModule<TMessMod>, new() => AddModule(commandPrefix, () => new T());
         public void AddModule(TPrefix commandPrefix, Func<IActionModule<TMessMod>> builder)
@@ -65,12 +87,12 @@ namespace YouTubeChatBot.Managers
             {
                 l.MessageEvent -= MessageUpdate;
                 l.StatusEvent -= (e) => StateHandle(l, e);
-                l.Dispose();
+                //l.Dispose();
             });
-            foreach (var item in actionModules)
-            {
-                (item as IDisposable)?.Dispose();
-            }
+            //foreach (var item in actionModules)
+            //{
+            //    (item as IDisposable)?.Dispose();
+            //}
             actionModules = null;
             sourceListeners = null;
         }

@@ -54,6 +54,11 @@ namespace YouTubeChatBot
         {
             AddObject(typeof(T), () => new T(), pattern);
         }
+        public void Register<T, TImpl>(Pattern pattern) where TImpl : class, T, new() where T : class
+        {
+            Register<TImpl>(pattern);
+            RegisterImplementation<T, TImpl>();
+        }
         public void RegisterImplementation<T, TImpl>()
             where T : class
             where TImpl : class, T
@@ -72,9 +77,21 @@ namespace YouTubeChatBot
                 throw new ArgumentException($"{type.Name} was not added");
             }
         }
+        public void RegisterSingleton<T, TImpl>() where TImpl : class, T, new() where T : class => RegisterSingleton<T, TImpl>(b => new TImpl());
+        public void RegisterSingleton<T, TImpl>(Func<DICargo, TImpl> builder) where TImpl : class, T where T : class
+        {
+            RegisterSingleton(builder);
+            RegisterImplementation<T, TImpl>();
+        }
+        public void RegisterSingleton<T, TImpl>(TImpl item) where TImpl : class, T where T : class => RegisterSingleton<T, TImpl>(b => item);
         public void Register<T>(Func<DICargo, T> builder, Pattern pattern) where T : class
         {
             AddObject(typeof(T), () => builder(this), pattern);
+        }
+        public void Register<T, TImpl>(Func<DICargo, TImpl> builder, Pattern pattern) where TImpl : class, T where T : class
+        {
+            Register(builder, pattern);
+            RegisterImplementation<T, TImpl>();
         }
         public void RegisterSingleton<T>() where T : class, new() => Register<T>(Pattern.Singleton);
         public void RegisterSingleton<T>(Func<DICargo,T> builder) where T : class => Register(builder, Pattern.Singleton);
@@ -84,6 +101,7 @@ namespace YouTubeChatBot
         }
         private void AddObject(Type type, Func<object> builder, Pattern pattern)
         {
+            if (builder == null) throw new ArgumentNullException(nameof(builder));
             var error = !typeDict.TryAdd(type, new Cargo(builder, pattern));
             if (error)
             {
