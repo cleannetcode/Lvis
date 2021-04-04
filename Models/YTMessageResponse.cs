@@ -12,7 +12,6 @@ namespace YouTubeChatBot.Models
         public DateTime UtcTime { get; }
         public DateTime StartStreamTime { get; }
         public AuthorTypes UserType { get; }
-        public DateTime StartStreamTime { get; }
 
         [Flags] 
         public enum AuthorTypes
