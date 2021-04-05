@@ -13,7 +13,6 @@ namespace YouTubeChatBot.Managers
     {
         char keyPrefix;
         YouTubeConfig ytConfig;
-        CancellationTokenSource token;
         public YTModuleManager(ConfigurationService configurationService, 
             Action<ModuleManager<string, YTMessageResponse, StatusResponse, YouTubeConfig>> configure) : base(configure)
         {
@@ -36,17 +35,14 @@ namespace YouTubeChatBot.Managers
         public void Run()
         {
             Run(ytConfig);
-            token = new CancellationTokenSource();
-            var endTask = new Task(() => { while (true) Thread.Sleep(1000000000); }, token.Token);
-            endTask.Wait();
+        }
+        public async Task RunAsync()
+        {
+            await Task.Run(Run);
         }
         protected override void StateHandle(ISourceListener<YouTubeConfig, YTMessageResponse, StatusResponse> sender, StatusResponse StatusModel)
         {
-            Console.WriteLine(StatusModel.State);
-            if (StatusModel.Code >= 400)
-            {
-                token.Cancel();
-            }
+            Console.WriteLine($"Code: {StatusModel.Code} Status: {StatusModel.State}");
         }
     }
 }

@@ -8,15 +8,16 @@ namespace YouTubeChatBot.Services
     class FileService
     {
         string absBaseFolderPath;
-        object locker = new object();
-        //List<Locker> fileAccess = new List<Locker>();
+        //в идеале иногда чистить этот словарь, но скорее всего нужно вообще иначе реализовывать доступ
+        //еще было бы неплохо асинхронные методы добавить
+        Dictionary<string, object> fileAcess = new Dictionary<string, object>();
         public FileService(ConfigurationService configurationService)
         {
             absBaseFolderPath = configurationService.AbsBaseFolderPath;
         }
         public void Append(string path, string source, string separator = null)
         {
-            lock (locker)
+            lock (GetLocker(path))
             {
                 var path1 = Path.Join(absBaseFolderPath, path);
                 File.AppendAllText(path1, $"{source}{separator ?? Environment.NewLine}");
@@ -24,14 +25,14 @@ namespace YouTubeChatBot.Services
         }
         public void Write(string path, string source)
         {
-            lock (locker)
+            lock (GetLocker(path))
             {
                 File.WriteAllText(Path.Join(absBaseFolderPath, path), source);
             }
         }
         public string Read(string path)
         {
-            lock (locker)
+            lock (GetLocker(path))
             {
                 var path1 = Path.Join(absBaseFolderPath, path);
                 if (!File.Exists(path1))
@@ -42,24 +43,18 @@ namespace YouTubeChatBot.Services
                 return File.ReadAllText(path1);
             }
         }
-        //class Locker
-        //{
-        //    public object locker = new object();
-        //    public string file;
-        //    public Locker(string path)
-        //    {
-        //        file = path;
-        //    }
-        //    public override bool Equals(object obj)
-        //    {
-        //        var locker = obj as Locker;
-        //        if (locker == null) return false;
-        //        return locker.file == file;
-        //    }
-        //    public override int GetHashCode()
-        //    {
-        //        return file.GetHashCode();
-        //    }
-        //}
+        private object GetLocker(string path)
+        {
+            if(fileAcess.TryGetValue(path, out var locker))
+            {
+                return locker;
+            }
+            else
+            {
+                var obj = new object();
+                fileAcess.Add(path, obj);
+                return obj;
+            }
+        }
     }
 }

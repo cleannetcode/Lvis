@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using YouTubeChatBot.Interfaces;
 using System.Threading.Tasks;
+using System.Linq;
 
 namespace YouTubeChatBot.Managers
 {
@@ -18,13 +19,6 @@ namespace YouTubeChatBot.Managers
         public ModuleManager(Action<ModuleManager<TPrefix, TMessMod, TStatMod, TListenerConf>> configure) : this()
         {
             configure?.Invoke(this);
-        }
-        private void ListenersManage(Action<ISourceListener<TListenerConf, TMessMod, TStatMod>> listenerAction)
-        {
-            foreach (var item in sourceListeners)
-            {
-                listenerAction(item);
-            }
         }
         private void MessageUpdate(TMessMod mess)
         {
@@ -79,16 +73,15 @@ namespace YouTubeChatBot.Managers
         }
         public void Run(TListenerConf config)
         {
-            ListenersManage(l => Task.Run(() => l.Run(config)));
+            Task.WaitAll(sourceListeners.Select(l => Task.Run(() => l.Run(config))).ToArray());
         }
         public void Dispose()
         {
-            ListenersManage(l =>
+            foreach (var l in sourceListeners)
             {
                 l.MessageEvent -= MessageUpdate;
                 l.StatusEvent -= (e) => StateHandle(l, e);
-                //l.Dispose();
-            });
+            }
             //foreach (var item in actionModules)
             //{
             //    (item as IDisposable)?.Dispose();

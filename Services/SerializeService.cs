@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using System.Text.Json;
+using Newtonsoft.Json;
 
 namespace YouTubeChatBot.Services
 {
@@ -9,11 +9,11 @@ namespace YouTubeChatBot.Services
     {
         public virtual string Serialize<T>(T model)
         {
-            return JsonSerializer.Serialize(model);
+            return JsonConvert.SerializeObject(model);
         }
         public virtual T Deserialize<T>(string model)
         {
-            return JsonSerializer.Deserialize<T>(model);
+            return JsonConvert.DeserializeObject<T>(model);
         }
     }
 }

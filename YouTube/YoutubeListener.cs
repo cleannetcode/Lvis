@@ -41,9 +41,13 @@ namespace YouTubeChatBot.YouTube
         }
         public void Run(YouTubeConfig configuration)
         {
+            RunAsync(configuration).Wait();
+        }
+        public async Task RunAsync(YouTubeConfig configuration)
+        {
             if (canceller != null) canceller.Cancel();
             canceller = new CancellationTokenSource();
-            _ = RunTask(TimeSpan.FromMilliseconds(configuration.UpdateMs), configuration.ChannelID, canceller.Token);
+            await RunTask(TimeSpan.FromMilliseconds(configuration.UpdateMs), configuration.ChannelID, canceller.Token);
         }
 
         private async Task<NetResponse> GetYoutubeResponse(Uri url) => await service.Request(url, NetService.RequestMethod.GET, new Dictionary<string, string>()
@@ -111,6 +115,20 @@ namespace YouTubeChatBot.YouTube
             start = start.Replace(' ', '+');
             return DateTime.Parse(start).ToUniversalTime();
         }
+        private async Task<(string ChannelID, string Title, string Icon)> GetChannelData(Uri url)
+        {
+            try
+            {
+                JObject json = await GetYoutubeData(url);
+                json = (JObject)json["metadata"]["channelMetadataRenderer"];
+                string _json = json.ToString();
+                return (json["externalId"].Value<string>(), json["title"].Value<string>(), json["avatar"]?["thumbnails"]?[0]?["url"]?.Value<string>());
+            }
+            catch
+            {
+                return default;
+            }
+        }
         private async Task RunTask(TimeSpan updateTimeout, string channelID, CancellationToken token)
         {
             try
@@ -138,7 +156,8 @@ namespace YouTubeChatBot.YouTube
                 string lastMessageID = null;
                 int errors = 0;
                 DateTime utcInit = DateTime.UtcNow;
-                StatusEvent?.Invoke(new StatusResponse(200, "LiveChat starded"));
+                var user = await GetChannelData(YoutubeURL.GetChannel(channelID));
+                StatusEvent?.Invoke(new StatusResponse(200, $"LiveChat starded: {user.Title}"));
                 while (true)
                 {
                     token.ThrowIfCancellationRequested();
@@ -202,6 +221,7 @@ namespace YouTubeChatBot.YouTube
                     foreach (var msg in msgs)
                     {
                         token.ThrowIfCancellationRequested();
+                        Console.WriteLine($"{msg.UserName}: {msg.Context}");
                         MessageEvent?.Invoke(msg);
                     }
                     errors = 0;
