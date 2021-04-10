@@ -26,73 +26,75 @@ namespace YouTubeChatBot.Services
         public async Task<NetResponse> Request(Uri url, RequestMethod method = RequestMethod.GET, IDictionary<string, string> headers = null, byte[] body = null)
         {
 
-            var client = new HttpClient(); // we re using a single httpClient | for that we must clear DefaultRequestHeaders
-
-            if (headers != null && headers.Count > 0)
+            using (var client = new HttpClient())
             {
-                foreach (var header in headers)
+
+                if (headers != null && headers.Count > 0)
                 {
-                    switch (header.Key.ToLower())
+                    foreach (var header in headers)
                     {
-                        case "accept": client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(header.Value)); break;
-                        case "host": client.DefaultRequestHeaders.Host = header.Value; break;
-                        case "authorization": client.DefaultRequestHeaders.Authorization = AuthenticationHeaderValue.Parse(header.Value); break;
-                        case "useragent": client.DefaultRequestHeaders.UserAgent.ParseAdd(header.Value); break;
-                        default: client.DefaultRequestHeaders.Add(header.Key, header.Value); break;
+                        switch (header.Key.ToLower())
+                        {
+                            case "accept": client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(header.Value)); break;
+                            case "host": client.DefaultRequestHeaders.Host = header.Value; break;
+                            case "authorization": client.DefaultRequestHeaders.Authorization = AuthenticationHeaderValue.Parse(header.Value); break;
+                            case "useragent": client.DefaultRequestHeaders.UserAgent.ParseAdd(header.Value); break;
+                            default: client.DefaultRequestHeaders.Add(header.Key, header.Value); break;
+                        }
                     }
                 }
-            }
 
-            switch (method)
-            {
-                case RequestMethod.DELETE:
-                    {
-                        var res = await client.DeleteAsync(url);
-                        
-                        var bytes = await res.Content.ReadAsByteArrayAsync();
-                        
-                        return new NetResponse(bytes, (int)res.StatusCode);
-                    }
-                case RequestMethod.GET:
-                    {
-                        var res = await client.GetAsync(url);
+                switch (method)
+                {
+                    case RequestMethod.DELETE:
+                        {
+                            var res = await client.DeleteAsync(url);
 
-                        var bytes = await res.Content.ReadAsByteArrayAsync();
+                            var bytes = await res.Content.ReadAsByteArrayAsync();
 
-                        return new NetResponse(bytes, (int)res.StatusCode);
-                    }
-                case RequestMethod.PATCH:
-                    {
-                        ByteArrayContent byteContent = new ByteArrayContent(body);
-                        
-                        var res = await client.PatchAsync(url, byteContent);
+                            return new NetResponse(bytes, (int)res.StatusCode);
+                        }
+                    case RequestMethod.GET:
+                        {
+                            var res = await client.GetAsync(url);
 
-                        var bytes = await res.Content.ReadAsByteArrayAsync();
+                            var bytes = await res.Content.ReadAsByteArrayAsync();
 
-                        return new NetResponse(bytes, (int)res.StatusCode);
-                    }
-                case RequestMethod.POST:
-                    {
-                        ByteArrayContent byteContent = new ByteArrayContent(body);
+                            return new NetResponse(bytes, (int)res.StatusCode);
+                        }
+                    case RequestMethod.PATCH:
+                        {
+                            ByteArrayContent byteContent = new ByteArrayContent(body);
 
-                        var res = await client.PostAsync(url, byteContent);
+                            var res = await client.PatchAsync(url, byteContent);
 
-                        var bytes = await res.Content.ReadAsByteArrayAsync();
+                            var bytes = await res.Content.ReadAsByteArrayAsync();
 
-                        return new NetResponse(bytes, (int)res.StatusCode);
-                    }
-                case RequestMethod.PUT:
-                    {
-                        ByteArrayContent byteContent = new ByteArrayContent(body);
+                            return new NetResponse(bytes, (int)res.StatusCode);
+                        }
+                    case RequestMethod.POST:
+                        {
+                            ByteArrayContent byteContent = new ByteArrayContent(body);
 
-                        var res = await client.PutAsync(url, byteContent);
+                            var res = await client.PostAsync(url, byteContent);
 
-                        var bytes = await res.Content.ReadAsByteArrayAsync();
+                            var bytes = await res.Content.ReadAsByteArrayAsync();
 
-                        return new NetResponse(bytes, (int)res.StatusCode);
-                    }
-                default:
-                    throw new HttpRequestException($"{method} - Invalid Request");
+                            return new NetResponse(bytes, (int)res.StatusCode);
+                        }
+                    case RequestMethod.PUT:
+                        {
+                            ByteArrayContent byteContent = new ByteArrayContent(body);
+
+                            var res = await client.PutAsync(url, byteContent);
+
+                            var bytes = await res.Content.ReadAsByteArrayAsync();
+
+                            return new NetResponse(bytes, (int)res.StatusCode);
+                        }
+                    default:
+                        throw new HttpRequestException($"{method} - Invalid Request");
+                }
             }
         }
     }
