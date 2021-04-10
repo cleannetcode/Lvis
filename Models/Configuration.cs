@@ -12,5 +12,6 @@ namespace YouTubeChatBot.Models
         public YouTubeConfig YouTubeConfig { get; set; }
         public SaveModuleConfiguration TimeCodeConfigure { get; set; }
         public SaveModuleConfiguration QuestionConfigure { get; set; }
+        public SaveModuleConfiguration CheckConfigure { get; set; }
     }
 }

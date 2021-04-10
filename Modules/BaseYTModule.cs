@@ -10,9 +10,9 @@ namespace YouTubeChatBot.Modules
 {
     abstract class BaseYTModule : IActionPrefixModule<YTMessageResponse, string>
     {
-        FileService fileService;
-        SerializeService serializeService;
-        string path;
+        protected readonly FileService fileService;
+        protected readonly SerializeService serializeService;
+        protected readonly string path;
         protected abstract string savefileformat { get; }
 
         public BaseYTModule(FileService fileService, SerializeService serializeService, SaveModuleConfiguration moduleConfiguration)
@@ -25,9 +25,10 @@ namespace YouTubeChatBot.Modules
 
         public string Prefix { get; }
 
-        public void Execute(YTMessageResponse param)
+        public virtual void Execute(YTMessageResponse param)
         {
-            var parse = param.Context.Remove(0, param.Context.IndexOf(' ') + 1);
+            var removeLength = Prefix.Length + 2;
+            var parse = param.Context.Remove(0, removeLength < param.Context.Length ? removeLength : param.Context.Length);
             var model = new BaseSaveModel
             {
                 DateTime = param.UtcTime,
@@ -36,7 +37,11 @@ namespace YouTubeChatBot.Modules
                 SecondFromStreamStart = (long)(param.UtcTime - param.StartStreamTime).TotalSeconds
             };
             var formatDate = param.StartStreamTime.ToString().Replace(' ', '_').Replace('.', '-').Replace(':', '-');
-            fileService.Append($"{Path.Join(path, string.Format(savefileformat, formatDate))}.json", serializeService.Serialize(model));
+            SaveFile(model, formatDate);
+        }
+        protected void SaveFile<T>(T model, string nameArg)
+        {
+            fileService.Append($"{Path.Join(path, string.Format(savefileformat, nameArg))}.json", serializeService.Serialize(model));
         }
     }
 }

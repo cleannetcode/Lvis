@@ -33,11 +33,15 @@ namespace YouTubeChatBot
             services.RegisterSingleton
                 (b => new TimeCodeHandler(b.GetObject<FileService>(), b.GetObject<SerializeService>(), b.GetObject<ConfigurationService>()));
 
+            services.RegisterSingleton
+                (b => new CheckHandler(b.GetObject<FileService>(), b.GetObject<SerializeService>(), b.GetObject<ConfigurationService>()));
+
             services.RegisterSingleton(b => new YTModuleManager(b.GetObject<ConfigurationService>(), m =>
             {
                 m.AddListener(b.GetObject<YoutubeListener>);
                 m.AddModule(b.GetObject<QuestionHandler>);
                 m.AddModule(b.GetObject<TimeCodeHandler>);
+                m.AddModule(b.GetObject<CheckHandler>);
             }));
         }
     }

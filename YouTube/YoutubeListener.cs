@@ -221,7 +221,7 @@ namespace YouTubeChatBot.YouTube
                     foreach (var msg in msgs)
                     {
                         token.ThrowIfCancellationRequested();
-                        Console.WriteLine($"{msg.UserName}: {msg.Context}");
+                        //Console.WriteLine($"{msg.UserName}: {msg.Context}");
                         MessageEvent?.Invoke(msg);
                     }
                     errors = 0;
