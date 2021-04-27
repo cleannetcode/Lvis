@@ -4,7 +4,7 @@ using System.Text;
 
 namespace YouTubeChatBot.Models
 {
-    class SaveModuleConfiguration
+    public class SaveModuleConfiguration
     {
         public string SavePath { get; set; }
         public string KeyWord { get; set; }

@@ -34,14 +34,17 @@ namespace YouTubeChatBot.Modules
                 DateTime = param.UtcTime,
                 Message = parse,
                 UserName = param.UserName,
-                SecondFromStreamStart = (long)(param.UtcTime - param.StartStreamTime).TotalSeconds
+                SecondFromStreamStart = (long)(param.UtcTime - param.StartStreamTime).TotalSeconds,
+                TimeSpan = (param.UtcTime - param.StartStreamTime).ToString(@"hh\:mm\:ss")
             };
-            var formatDate = param.StartStreamTime.ToString().Replace(' ', '_').Replace('.', '-').Replace(':', '-');
-            SaveFile(model, formatDate);
+            var dateFormat = param.StartStreamTime.ToString("dd.MM.yyyy_HH.mm.ss");
+            SaveFile(model, dateFormat);
         }
-        protected void SaveFile<T>(T model, string nameArg)
+        protected void SaveFile<T>(T model, string dateFormat)
         {
-            fileService.Append($"{Path.Join(path, string.Format(savefileformat, nameArg))}.json", serializeService.Serialize(model));
+            var filePath = $"{Path.Join(path, string.Format(savefileformat, dateFormat))}.json";
+
+            fileService.Append(filePath, serializeService.Serialize(model));
         }
     }
 }

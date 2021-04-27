@@ -5,7 +5,7 @@ using Newtonsoft.Json;
 
 namespace YouTubeChatBot.Services
 {
-    class SerializeService
+    public class SerializeService
     {
         public virtual string Serialize<T>(T model)
         {

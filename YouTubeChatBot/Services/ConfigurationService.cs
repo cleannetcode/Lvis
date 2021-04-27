@@ -6,7 +6,7 @@ using System.IO;
 
 namespace YouTubeChatBot.Services
 {
-    class ConfigurationService
+    public class ConfigurationService
     {
         public string AbsBaseFolderPath { get; }
         public SaveModuleConfiguration TimeCodeConfigure { get; }

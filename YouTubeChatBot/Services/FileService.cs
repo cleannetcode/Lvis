@@ -5,9 +5,9 @@ using System.Text;
 
 namespace YouTubeChatBot.Services
 {
-    class FileService
+    public class FileService
     {
-        string absBaseFolderPath;
+        private string absBaseFolderPath;
         //в идеале иногда чистить этот словарь, но скорее всего нужно вообще иначе реализовывать доступ
         //еще было бы неплохо асинхронные методы добавить
         Dictionary<string, object> fileAcess = new Dictionary<string, object>();

@@ -10,5 +10,6 @@ namespace YouTubeChatBot.Models
         public long SecondFromStreamStart { get; set; }
         public string UserName { get; set; }
         public string Message { get; set; }
+        public string TimeSpan { get; set; }
     }
 }
