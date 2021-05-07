@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using LvisBot.CargoDI;
 using YouTubeChatBot.Modules;
 using YouTubeChatBot.Managers;
 using YouTubeChatBot.Services;
@@ -12,11 +13,11 @@ namespace YouTubeChatBot
 {
     partial class Startup
     {
-        private void RunWith(DICargo services)
+        private void RunWith(CargoCollection services)
         {
             services.GetObject<YTModuleManager>().Run();
         }
-        private void ConfigureServices(DICargo services)
+        private void ConfigureServices(CargoCollection services)
         {
             services.RegisterSingleton(b => new ConfigurationService(b.GetObject<SerializeService>()));
             services.RegisterSingleton(b => new FileService(b.GetObject<ConfigurationService>()));

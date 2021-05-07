@@ -5,6 +5,12 @@ VisualStudioVersion = 16.0.30611.23
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YouTubeChatBot", "YouTubeChatBot\YouTubeChatBot.csproj", "{22A319AB-3AE8-49CA-AA6F-2AD3BD2EE083}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReadTimeCodes", "ReadTimeCodes\ReadTimeCodes.csproj", "{09161A64-8415-4010-AA8D-5F9485D9A6CD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LvisBot.DataAccess", "LvisBot\LvisBot.DataAccess.csproj", "{836C5A80-C590-4C0D-9DE2-B946BC0F28B9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LvisBot.CargoDI", "LvisBot.CargoDI\LvisBot.CargoDI.csproj", "{D4CB1410-18C7-4BAA-B4FA-DEF7BC2D33E6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +21,18 @@ Global
 		{22A319AB-3AE8-49CA-AA6F-2AD3BD2EE083}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{22A319AB-3AE8-49CA-AA6F-2AD3BD2EE083}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{22A319AB-3AE8-49CA-AA6F-2AD3BD2EE083}.Release|Any CPU.Build.0 = Release|Any CPU
+		{09161A64-8415-4010-AA8D-5F9485D9A6CD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{09161A64-8415-4010-AA8D-5F9485D9A6CD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{09161A64-8415-4010-AA8D-5F9485D9A6CD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{09161A64-8415-4010-AA8D-5F9485D9A6CD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{836C5A80-C590-4C0D-9DE2-B946BC0F28B9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{836C5A80-C590-4C0D-9DE2-B946BC0F28B9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{836C5A80-C590-4C0D-9DE2-B946BC0F28B9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{836C5A80-C590-4C0D-9DE2-B946BC0F28B9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D4CB1410-18C7-4BAA-B4FA-DEF7BC2D33E6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D4CB1410-18C7-4BAA-B4FA-DEF7BC2D33E6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D4CB1410-18C7-4BAA-B4FA-DEF7BC2D33E6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D4CB1410-18C7-4BAA-B4FA-DEF7BC2D33E6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
