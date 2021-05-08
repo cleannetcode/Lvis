@@ -7,7 +7,7 @@ using LvisBot.CargoDI;
 
 namespace YouTubeChatBot
 {
-    partial class Startup : IDisposable
+    public class Startup : IDisposable
     {
         CargoCollection _cargoCollection;
         public Task RunAsync()

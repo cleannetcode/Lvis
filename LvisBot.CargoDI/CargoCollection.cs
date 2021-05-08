@@ -5,20 +5,13 @@ namespace LvisBot.CargoDI
 {
     public class CargoCollection : IDisposable, IEnumerable<Type>
     {
-        Dictionary<Type, Cargo> _typeDict;
+        private Dictionary<Type, Cargo> _typeDict;
+        
         public CargoCollection()
         {
             _typeDict = new Dictionary<Type, Cargo>(TypeComparer.Comparer);
         }
-        public void Dispose()
-        {
-            foreach (var c in _typeDict)
-            {
-                c.Value.Dispose();
-            }
-            _typeDict = null;
-        }
-
+        
         public IEnumerator<Type> GetEnumerator()
         {
             var tempEn = _typeDict.GetEnumerator();
@@ -27,10 +20,12 @@ namespace LvisBot.CargoDI
                 yield return tempEn.Current.Key;
             }
         }
+        
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
         {
             return GetEnumerator();
         }
+        
         #region register methods
         public void Register<T>(Pattern pattern) where T: class, new()
         {
@@ -132,6 +127,15 @@ namespace LvisBot.CargoDI
                 (_singletonInst as IDisposable)?.Dispose();
                 _singletonInst = null;
             }
+        }
+        
+        public void Dispose()
+        {
+            foreach (var c in _typeDict)
+            {
+                c.Value.Dispose();
+            }
+            _typeDict = null;
         }
     }
 }

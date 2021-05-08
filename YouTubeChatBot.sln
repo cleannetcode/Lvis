@@ -11,6 +11,16 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LvisBot.DataAccess", "LvisB
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LvisBot.CargoDI", "LvisBot.CargoDI\LvisBot.CargoDI.csproj", "{D4CB1410-18C7-4BAA-B4FA-DEF7BC2D33E6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LvisBot.CLI", "LvisBot.CLI\LvisBot.CLI.csproj", "{9C6080FF-AD27-4BFC-918A-3574C0A3320F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LvisBot.Domain", "LvisBot.Domain\LvisBot.Domain.csproj", "{F6640DC6-7AE1-4896-8667-5F3F4E5A49D4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LvisBot.Tests", "LvisBot.Tests\LvisBot.Tests.csproj", "{FF32B610-7A61-4B9D-8B0F-61ED83B3D017}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LvisBot.BusinessLogic", "LvisBot.BusinessLogic\LvisBot.BusinessLogic.csproj", "{E8E6D8B0-BBC4-4D4A-8CF7-E8EF105A0B5F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LvisBot.YouTube", "LvisBot.YouTube\LvisBot.YouTube.csproj", "{C7273B8F-83A7-4E66-B844-8B84B14B66A7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +43,26 @@ Global
 		{D4CB1410-18C7-4BAA-B4FA-DEF7BC2D33E6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D4CB1410-18C7-4BAA-B4FA-DEF7BC2D33E6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D4CB1410-18C7-4BAA-B4FA-DEF7BC2D33E6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9C6080FF-AD27-4BFC-918A-3574C0A3320F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9C6080FF-AD27-4BFC-918A-3574C0A3320F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9C6080FF-AD27-4BFC-918A-3574C0A3320F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9C6080FF-AD27-4BFC-918A-3574C0A3320F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F6640DC6-7AE1-4896-8667-5F3F4E5A49D4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F6640DC6-7AE1-4896-8667-5F3F4E5A49D4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F6640DC6-7AE1-4896-8667-5F3F4E5A49D4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F6640DC6-7AE1-4896-8667-5F3F4E5A49D4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FF32B610-7A61-4B9D-8B0F-61ED83B3D017}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FF32B610-7A61-4B9D-8B0F-61ED83B3D017}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FF32B610-7A61-4B9D-8B0F-61ED83B3D017}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FF32B610-7A61-4B9D-8B0F-61ED83B3D017}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E8E6D8B0-BBC4-4D4A-8CF7-E8EF105A0B5F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E8E6D8B0-BBC4-4D4A-8CF7-E8EF105A0B5F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E8E6D8B0-BBC4-4D4A-8CF7-E8EF105A0B5F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E8E6D8B0-BBC4-4D4A-8CF7-E8EF105A0B5F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C7273B8F-83A7-4E66-B844-8B84B14B66A7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C7273B8F-83A7-4E66-B844-8B84B14B66A7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C7273B8F-83A7-4E66-B844-8B84B14B66A7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C7273B8F-83A7-4E66-B844-8B84B14B66A7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
