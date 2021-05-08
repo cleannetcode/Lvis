@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Threading;
+using System.Threading.Tasks;
+using LvisBot.Domain.Models;
 
 namespace LvisBot.Domain.Interfaces
 {
@@ -8,5 +11,6 @@ namespace LvisBot.Domain.Interfaces
         event Action<TMess> OnMessageReceived;
         event Action<TStat> OnStatusReceived;
         void Run(TConf configuration);
+        Task RunAsync(TConf configuration, CancellationToken token);
     }
 }

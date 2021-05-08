@@ -3,11 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30611.23
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YouTubeChatBot", "YouTubeChatBot\YouTubeChatBot.csproj", "{22A319AB-3AE8-49CA-AA6F-2AD3BD2EE083}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReadTimeCodes", "ReadTimeCodes\ReadTimeCodes.csproj", "{09161A64-8415-4010-AA8D-5F9485D9A6CD}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LvisBot.DataAccess", "LvisBot\LvisBot.DataAccess.csproj", "{836C5A80-C590-4C0D-9DE2-B946BC0F28B9}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LvisBot.CargoDI", "LvisBot.CargoDI\LvisBot.CargoDI.csproj", "{D4CB1410-18C7-4BAA-B4FA-DEF7BC2D33E6}"
 EndProject
@@ -21,24 +17,18 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LvisBot.BusinessLogic", "Lv
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LvisBot.YouTube", "LvisBot.YouTube\LvisBot.YouTube.csproj", "{C7273B8F-83A7-4E66-B844-8B84B14B66A7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LvisBot.DataAccess", "LvisBot.DataAccess\LvisBot.DataAccess.csproj", "{D7F69B81-7521-484B-B0B1-CD41BFC45C1F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{22A319AB-3AE8-49CA-AA6F-2AD3BD2EE083}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{22A319AB-3AE8-49CA-AA6F-2AD3BD2EE083}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{22A319AB-3AE8-49CA-AA6F-2AD3BD2EE083}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{22A319AB-3AE8-49CA-AA6F-2AD3BD2EE083}.Release|Any CPU.Build.0 = Release|Any CPU
 		{09161A64-8415-4010-AA8D-5F9485D9A6CD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{09161A64-8415-4010-AA8D-5F9485D9A6CD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{09161A64-8415-4010-AA8D-5F9485D9A6CD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{09161A64-8415-4010-AA8D-5F9485D9A6CD}.Release|Any CPU.Build.0 = Release|Any CPU
-		{836C5A80-C590-4C0D-9DE2-B946BC0F28B9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{836C5A80-C590-4C0D-9DE2-B946BC0F28B9}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{836C5A80-C590-4C0D-9DE2-B946BC0F28B9}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{836C5A80-C590-4C0D-9DE2-B946BC0F28B9}.Release|Any CPU.Build.0 = Release|Any CPU
 		{D4CB1410-18C7-4BAA-B4FA-DEF7BC2D33E6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{D4CB1410-18C7-4BAA-B4FA-DEF7BC2D33E6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D4CB1410-18C7-4BAA-B4FA-DEF7BC2D33E6}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -63,6 +53,10 @@ Global
 		{C7273B8F-83A7-4E66-B844-8B84B14B66A7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C7273B8F-83A7-4E66-B844-8B84B14B66A7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C7273B8F-83A7-4E66-B844-8B84B14B66A7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D7F69B81-7521-484B-B0B1-CD41BFC45C1F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D7F69B81-7521-484B-B0B1-CD41BFC45C1F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D7F69B81-7521-484B-B0B1-CD41BFC45C1F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D7F69B81-7521-484B-B0B1-CD41BFC45C1F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

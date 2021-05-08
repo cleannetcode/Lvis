@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using LvisBot.BusinessLogic.Services;
 using LvisBot.Domain.Interfaces;
@@ -25,9 +26,9 @@ namespace LvisBot.BusinessLogic.Managers
             Run(_ytConfig);
         }
         
-        public async Task RunAsync()
+        public async Task RunAsync(CancellationToken token)
         {
-            await Task.Run(Run);
+            await Task.Run(Run, token);
         }
         
         protected override string GetPrefix(YTMessageResponse mess)

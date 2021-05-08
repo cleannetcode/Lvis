@@ -4,6 +4,7 @@ namespace LvisBot.Domain.Models
 {
     public class YTMessageResponse
     {
+        public string MessageId { get; }
         public string UserName { get; }
         public string UserId { get; }
         public string Context { get; }
@@ -22,8 +23,9 @@ namespace LvisBot.Domain.Models
             Sponsor = 1 << 4,
         }
 
-        public YTMessageResponse(string userName, string userId, string context, DateTime utcTime, DateTime startStreamTime, AuthorTypes userType)
+        public YTMessageResponse(string messageId, string userName, string userId, string context, DateTime utcTime, DateTime startStreamTime, AuthorTypes userType)
         {
+            MessageId = messageId;
             UserName = userName;
             UserId = userId;
             Context = context;

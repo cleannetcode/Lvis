@@ -8,6 +8,7 @@ using System.Web;
 using LvisBot.Domain.Enums;
 using LvisBot.Domain.Interfaces;
 using LvisBot.Domain.Models;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
 
 namespace LvisBot.YouTube
@@ -22,11 +23,13 @@ namespace LvisBot.YouTube
         }
 
         private readonly INetService _service;
+        private readonly ILogger _logger;
         private CancellationTokenSource _canceller;
 
-        public YoutubeListener(INetService service)
+        public YoutubeListener(INetService service, ILogger logger)
         {
             _service = service;
+            _logger = logger;
         }
 
         public event Action<YTMessageResponse> OnMessageReceived;
@@ -35,13 +38,11 @@ namespace LvisBot.YouTube
        
         public void Run(YouTubeConfig configuration)
         {
-            RunAsync(configuration).Wait();
+            RunAsync(configuration, CancellationToken.None).Wait();
         }
-        public async Task RunAsync(YouTubeConfig configuration)
+        public async Task RunAsync(YouTubeConfig configuration, CancellationToken token)
         {
-            if (_canceller != null) _canceller.Cancel();
-            _canceller = new CancellationTokenSource();
-            await RunTask(TimeSpan.FromMilliseconds(configuration.UpdateMs), configuration.ChannelID, _canceller.Token);
+            await RunTask(TimeSpan.FromMilliseconds(configuration.UpdateMs), configuration.ChannelID, token);
         }
 
         private async Task<NetResponse> GetYoutubeResponse(Uri url) => await _service.Request(url, RequestMethod.GET, new Dictionary<string, string>()
@@ -160,14 +161,10 @@ namespace LvisBot.YouTube
                 var user = await GetChannelData(YoutubeURL.GetChannel(channelId));
                 OnStatusReceived?.Invoke(new StatusResponse(200, $"LiveChat started: {user.Title}"));
                 
-                while (true)
+                while (errors < 10)
                 {
                     token.ThrowIfCancellationRequested();
-                    if (errors > 10)
-                    {
-                        OnStatusReceived?.Invoke(new StatusResponse(400, "LiveChat closed"));
-                        return;
-                    }
+                    
                     await Task.Delay(updateTimeout);
                     token.ThrowIfCancellationRequested();
                     string firstMessageId = null;
@@ -186,7 +183,9 @@ namespace LvisBot.YouTube
                         try
                         {
                             if (!item.TryGetValue("addChatItemAction", out var chatItem)) continue;
+                            
                             chatItem = chatItem["item"]["liveChatTextMessageRenderer"];
+                            
                             if (chatItem == null) continue;
 
                             var message = chatItem["message"]["runs"][0]["text"].Value<string>();
@@ -215,11 +214,11 @@ namespace LvisBot.YouTube
                             if (lastMessageId == null && utcTime < utcInit) continue;
                             if (firstMessageId == null) firstMessageId = messageID;
                             if (lastMessageId == messageID) break;
-                            messageResponses.Add(new YTMessageResponse(authorName, authorID, message, utcTime, startTime, authorType));
+                            messageResponses.Add(new YTMessageResponse(messageID, authorName, authorID, message, utcTime, startTime, authorType));
                         }
-                        catch
+                        catch (Exception ex)
                         {
-
+                            _logger.LogError(ex, ex.Message);
                         }
                     }
                     messageResponses.Reverse();
@@ -233,6 +232,9 @@ namespace LvisBot.YouTube
                     lastMessageId = firstMessageId ?? lastMessageId;
                     token.ThrowIfCancellationRequested();
                 }
+                
+                if (errors > 10)
+                    OnStatusReceived?.Invoke(new StatusResponse(400, "LiveChat closed"));
             }
             catch (Exception e)
             {

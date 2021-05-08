@@ -5,16 +5,20 @@ using LvisBot.CargoDI;
 using LvisBot.Domain.Interfaces;
 using LvisBot.Domain.Models;
 using LvisBot.YouTube;
+using Microsoft.Extensions.Logging;
 
 namespace LvisBot.CLI
 {
     public class Startup
     {
-        private void RunWith(CargoCollection services)
+        private readonly ILogger _logger;
+
+        public Startup(ILogger logger)
         {
-            services.GetObject<YTModuleManager>().Run();
+            _logger = logger;
         }
-        private void ConfigureServices(CargoCollection services)
+        
+        public void ConfigureServices(CargoCollection services)
         {
             services.RegisterSingleton(b => new ConfigurationService(b.GetObject<SerializationService>()));
             services.RegisterSingleton(b => new FileService(b.GetObject<ConfigurationService>()));
@@ -23,7 +27,7 @@ namespace LvisBot.CLI
             services.RegisterSingleton(b => new TimeService(b.GetObject<ConfigurationService>()));
 
             services.RegisterSingleton<ISourceListener<YouTubeConfig, YTMessageResponse, StatusResponse>, YoutubeListener>
-                (b => new YoutubeListener(b.GetObject<NetService>()));
+                (b => new YoutubeListener(b.GetObject<NetService>(), _logger));
 
             services.RegisterSingleton
                 (b => new QuestionHandler(b.GetObject<FileService>(), b.GetObject<SerializationService>(), b.GetObject<ConfigurationService>()));

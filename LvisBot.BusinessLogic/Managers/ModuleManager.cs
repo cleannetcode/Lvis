@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using LvisBot.Domain.Interfaces;
 
@@ -69,7 +70,13 @@ namespace LvisBot.BusinessLogic.Managers
         
         public void Run(TListenerConf config)
         {
-            Task.WaitAll(_sourceListeners.Select(l => Task.Run(() => l.Run(config))).ToArray());
+            var tokenSource = new CancellationTokenSource();
+
+            var listeners = _sourceListeners
+                .Select(l => l.RunAsync(config, tokenSource.Token))
+                .ToArray();
+            
+            Task.WaitAll(listeners, tokenSource.Token);
         }
         
         protected abstract TPrefix GetPrefix(TMessMod mess);
