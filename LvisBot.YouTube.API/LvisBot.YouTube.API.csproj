@@ -8,4 +8,9 @@
       <ProjectReference Include="..\LvisBot.Domain\LvisBot.Domain.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <PackageReference Include="Google.Apis.YouTube.v3" Version="1.51.0.2294" />
+      <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="5.0.0" />
+    </ItemGroup>
+
 </Project>

@@ -4,7 +4,7 @@ using LvisBot.BusinessLogic.Services;
 using LvisBot.CargoDI;
 using LvisBot.Domain.Interfaces;
 using LvisBot.Domain.Models;
-using LvisBot.YouTube;
+using LvisBot.YouTube.API;
 using Microsoft.Extensions.Logging;
 
 namespace LvisBot.CLI
