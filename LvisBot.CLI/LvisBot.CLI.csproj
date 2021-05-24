@@ -12,6 +12,7 @@
     <ItemGroup>
       <ProjectReference Include="..\LvisBot.BusinessLogic\LvisBot.BusinessLogic.csproj" />
       <ProjectReference Include="..\LvisBot.CargoDI\LvisBot.CargoDI.csproj" />
+      <ProjectReference Include="..\LvisBot.YouTube.API\LvisBot.YouTube.API.csproj" />
       <ProjectReference Include="..\LvisBot.YouTube\LvisBot.YouTube.csproj" />
       <ProjectReference Include="..\LvisBot.DataAccess\LvisBot.DataAccess.csproj" />
     </ItemGroup>
