@@ -23,7 +23,14 @@ namespace LvisBot.Domain.Models
             Sponsor = 1 << 4,
         }
 
-        public YTMessageResponse(string messageId, string userName, string userId, string context, DateTime utcTime, DateTime startStreamTime, AuthorTypes userType)
+        public YTMessageResponse(
+            string messageId, 
+            string userName, 
+            string userId, 
+            string context, 
+            DateTime utcTime, 
+            DateTime startStreamTime, 
+            AuthorTypes userType)
         {
             MessageId = messageId;
             UserName = userName;

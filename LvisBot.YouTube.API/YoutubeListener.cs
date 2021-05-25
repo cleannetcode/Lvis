@@ -61,90 +61,136 @@ namespace LvisBot.YouTube.API
             return responseData;
         }
 
-        private VideoData GetListDataVideo(string idVideo)
+        private YTVideoDataResponse GetListDataVideo(string idVideo)
         {
             var RequestVideoData = _youTubeService.Videos.List("snippet,statistics,liveStreamingDetails");
                 RequestVideoData.Id = idVideo;
             
             var ResponseVideoData = RequestVideoData.Execute();
-            VideoData result = null;
+            YTVideoDataResponse result = null;
             
             if (ResponseVideoData.Items.Count > 0)
             {
                 var item = ResponseVideoData.Items[0];
-                result = new VideoData(
-                    item.Snippet.Title,
-                    item.Snippet.PublishedAt.Value.Date.ToString(),
+                result = new YTVideoDataResponse(
+                    item.Snippet.Title, 
+                    item.Snippet.PublishedAt.Value,
                     item.LiveStreamingDetails.ActiveLiveChatId,
-                    item.Statistics.LikeCount.ToString(),
-                    item.Statistics.ViewCount.ToString());
+                    item.Statistics.LikeCount,
+                    item.Statistics.ViewCount);
             }
             return result;
         }
 
-        private void GetListCommentsVideo(string idLiveChat)
+        private List<YTMessageResponse> GetListCommentsVideo(string idLiveChat)
         {
             var RequestLiveChatData = _youTubeService.LiveChatMessages.List(idLiveChat,"snippet,AuthorDetails");
                 
             var ResponseLiveChatData = RequestLiveChatData.Execute();
+
+            var nextPageToken = ResponseLiveChatData.NextPageToken;
             
-            var comments = new List<string>();
+            //pagination via request by chat
+            // var totalResult = ResponseLiveChatData.PageInfo.ResultsPerPage;
+            // var resultPerPage = ResponseLiveChatData.PageInfo.ResultsPerPage; 
+
+            List<YTMessageResponse> result = new List<YTMessageResponse>();
             foreach (var item in ResponseLiveChatData.Items)
             {
-                comments.Add(item?.AuthorDetails.DisplayName + " : " + item.Snippet.DisplayMessage);
-                Console.WriteLine(item?.AuthorDetails.DisplayName + " : " + item.Snippet.DisplayMessage);
+                var userType = 
+                    item.AuthorDetails.IsChatOwner.Value ? YTMessageResponse.AuthorTypes.Owner :
+                    item.AuthorDetails.IsChatModerator.Value ? YTMessageResponse.AuthorTypes.Moderator :
+                    item.AuthorDetails.IsVerified.Value ? YTMessageResponse.AuthorTypes.Verified :
+                    item.AuthorDetails.IsChatSponsor.Value ? YTMessageResponse.AuthorTypes.Sponsor :
+                    YTMessageResponse.AuthorTypes.Other;
+
+                result.Add(new YTMessageResponse(
+                    item.Id,
+                    item.AuthorDetails.DisplayName,
+                    item.AuthorDetails.ChannelId,
+                    item.Snippet.DisplayMessage,
+                    item.Snippet.PublishedAt.Value,
+                    DateTime.UtcNow,
+                    userType));
             }
+
+            return result;
         }
         public async Task RunAsync(YouTubeConfig configuration, CancellationToken token)
         {
-            Console.WriteLine("RunAsync");
-            
-            _youTubeService = new YouTubeService(new BaseClientService.Initializer()
+            try
             {
-                ApiKey = configuration.ApiKey,
-                ApplicationName = configuration.ApplicationName
-            });
+                _youTubeService = new YouTubeService(new BaseClientService.Initializer()
+                {
+                    ApiKey = configuration.ApiKey,
+                    ApplicationName = configuration.ApplicationName
+                });
             
-            var liveStreams = GetListLiveVideo(configuration.ChannelID);
-            if (liveStreams.Count == 0)
-            {
-                OnStatusReceived?.Invoke(new StatusResponse(404, "Stream not founded"));
-                return;
+                var liveStreams = GetListLiveVideo(configuration.ChannelID);
+                if (liveStreams.Count == 0)
+                {
+                    OnStatusReceived?.Invoke(new StatusResponse(404, "Stream not founded"));
+                    return;
+                }
+            
+                var videoData = GetListDataVideo(liveStreams[0]);
+                if (videoData == null)
+                {
+                    OnStatusReceived?.Invoke(new StatusResponse(404, "Video info not founded"));
+                    return;
+                }
+                
+                OnStatusReceived?.Invoke(new StatusResponse(200, $"LiveChat started: {videoData.VideoTitle + " - " + videoData.VideoPublishedAt}"));
+                var errors = 0;
+                var utcInit = DateTime.UtcNow;
+                DateTime? lastMessageTime = null;
+                
+                while (errors < 10)
+                {
+                    var messageResponses = new List<YTMessageResponse>();
+                    token.ThrowIfCancellationRequested();
+                    await Task.Delay(TimeSpan.FromMilliseconds(configuration.UpdateMs));
+                    token.ThrowIfCancellationRequested();
+                    
+                    DateTime? firstMessageTime = null;                    
+                    var chatMessages = GetListCommentsVideo(videoData.IdLiveChat);
+                    
+                    if (chatMessages.Count == 0)
+                    {
+                        errors++;
+                        continue;
+                    }
+                    chatMessages.Reverse();
+                    foreach (var message in chatMessages)
+                    {
+                        if (lastMessageTime == null && message.UtcTime < utcInit) continue;
+                        if (firstMessageTime == null) firstMessageTime = message.UtcTime;
+                        if (lastMessageTime >= message.UtcTime) break;
+                        messageResponses.Add(message);
+                    }
+                    
+                    messageResponses.Reverse();
+                    foreach (var messageResponse in messageResponses)
+                    {
+                        token.ThrowIfCancellationRequested();
+                        Console.WriteLine($"{messageResponse.UserName}: {messageResponse.Context}");
+                        OnMessageReceived?.Invoke(messageResponse);
+                    }
+                    
+                    errors = 0;
+                    lastMessageTime = firstMessageTime ?? lastMessageTime;
+                    token.ThrowIfCancellationRequested();
+                }
+
+                if (errors > 10)
+                {
+                    OnStatusReceived?.Invoke(new StatusResponse(400, "LiveChat closed"));
+                }
             }
-            
-            var videoData = GetListDataVideo(liveStreams[0]);
-            if (videoData == null)
+            catch (Exception e)
             {
-                OnStatusReceived?.Invoke(new StatusResponse(404, "Video info not founded"));
-                return;
+                OnStatusReceived?.Invoke(new StatusResponse(401, e.ToString()));
             }
-            
-            
-            //GetListCommentsVideo();
-       
-            await new Task(null);
-        }
-        internal class VideoData
-        {
-            public string VideoTitle { get; }
-            public string VideoPublishedAt { get; }
-            public string IdLiveChat { get; }
-            public string VideoCountLikes { get; }
-            public string VideoCountView { get; } 
-            public VideoData(
-                string videoTitle, 
-                string videoPublishedAt,
-                string idLiveChat,
-                string videoCountLikes,
-                string videoCountView)
-            {
-                VideoTitle = videoTitle;
-                VideoPublishedAt = videoPublishedAt;
-                IdLiveChat = idLiveChat;
-                VideoCountLikes = videoCountLikes;
-                VideoCountView = videoCountView;
-            }
-           
         }
     }
 }
