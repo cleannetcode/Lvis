@@ -15,6 +15,7 @@ namespace LvisBot.YouTube.API
     {
         private readonly INetService _service;
         private readonly ILogger _logger;
+        private YouTubeService _youTubeService;
 
         public YoutubeListener(INetService service, ILogger logger)
         {
@@ -33,40 +34,117 @@ namespace LvisBot.YouTube.API
             RunAsync(configuration, CancellationToken.None).Wait();
         }
 
-        public async Task RunAsync(YouTubeConfig configuration, CancellationToken token)
+        private List<string> GetListLiveVideo(string channelId)
         {
-            Console.WriteLine("RunAsync");
-
-            var youTubeService = new YouTubeService(new BaseClientService.Initializer()
-            {
-                ApiKey = "",
-                ApplicationName = "Cleannetcode"
-            });
+            var searchListRequest = _youTubeService.Search.List("snippet");
+            searchListRequest.ChannelId = channelId; 
+            // "UCOxqgCwgOqC2lMqC5PYz_Dg";// Chillhop Music
+            // "UCbOgH6XlQURq9PnGfa4L4Mw";//Roman Trufanov
+            searchListRequest.MaxResults = 2;
+            searchListRequest.EventType = SearchResource.ListRequest.EventTypeEnum.Live;
+            searchListRequest.Type = "video";
+                
             
-            var RequestVideoData = youTubeService.Videos.List("snippet,statistics,liveStreamingDetails");
-                RequestVideoData.Id = "5yx6BWlEVcY";
+            //var searchListResponse = await searchListRequest.ExecuteAsync();
+            var searchListResponse = searchListRequest.Execute();
+            
+            var responseData = new List<string>();
+            foreach (var item in searchListResponse.Items)
+            {
+                responseData.Add(item.Id.VideoId);
+                //item.Snippet.PublishedAt.Value.ToString();
+                // item.Snippet.Title;
+                // item.Snippet.Description;
+                //Console.WriteLine(item.Id + " : " + item.Snippet.Title);
+            }
 
+            return responseData;
+        }
+
+        private VideoData GetListDataVideo(string idVideo)
+        {
+            var RequestVideoData = _youTubeService.Videos.List("snippet,statistics,liveStreamingDetails");
+                RequestVideoData.Id = idVideo;
+            
             var ResponseVideoData = RequestVideoData.Execute();
+            VideoData result = null;
+            
+            if (ResponseVideoData.Items.Count > 0)
+            {
+                var item = ResponseVideoData.Items[0];
+                result = new VideoData(
+                    item.Snippet.Title,
+                    item.Snippet.PublishedAt.Value.Date.ToString(),
+                    item.LiveStreamingDetails.ActiveLiveChatId,
+                    item.Statistics.LikeCount.ToString(),
+                    item.Statistics.ViewCount.ToString());
+            }
+            return result;
+        }
 
-            var videoTitle = ResponseVideoData.Items[0].Snippet.Title;
-            var videoPublishedAt = ResponseVideoData.Items[0].Snippet.PublishedAt.Value.Date.ToString();
-            var idLiveChat = ResponseVideoData.Items[0].LiveStreamingDetails.ActiveLiveChatId;
-
-            var videoCountLikes = ResponseVideoData.Items[0].Statistics.LikeCount.ToString();
-            var videoCountView = ResponseVideoData.Items[0].Statistics.ViewCount.ToString();
-
-            var RequestLiveChatData = youTubeService.LiveChatMessages.List(idLiveChat,"snippet,AuthorDetails");
+        private void GetListCommentsVideo(string idLiveChat)
+        {
+            var RequestLiveChatData = _youTubeService.LiveChatMessages.List(idLiveChat,"snippet,AuthorDetails");
                 
             var ResponseLiveChatData = RequestLiveChatData.Execute();
-
+            
             var comments = new List<string>();
             foreach (var item in ResponseLiveChatData.Items)
             {
                 comments.Add(item?.AuthorDetails.DisplayName + " : " + item.Snippet.DisplayMessage);
                 Console.WriteLine(item?.AuthorDetails.DisplayName + " : " + item.Snippet.DisplayMessage);
             }
-
+        }
+        public async Task RunAsync(YouTubeConfig configuration, CancellationToken token)
+        {
+            Console.WriteLine("RunAsync");
+            
+            _youTubeService = new YouTubeService(new BaseClientService.Initializer()
+            {
+                ApiKey = configuration.ApiKey,
+                ApplicationName = configuration.ApplicationName
+            });
+            
+            var liveStreams = GetListLiveVideo(configuration.ChannelID);
+            if (liveStreams.Count == 0)
+            {
+                OnStatusReceived?.Invoke(new StatusResponse(404, "Stream not founded"));
+                return;
+            }
+            
+            var videoData = GetListDataVideo(liveStreams[0]);
+            if (videoData == null)
+            {
+                OnStatusReceived?.Invoke(new StatusResponse(404, "Video info not founded"));
+                return;
+            }
+            
+            
+            //GetListCommentsVideo();
+       
             await new Task(null);
+        }
+        internal class VideoData
+        {
+            public string VideoTitle { get; }
+            public string VideoPublishedAt { get; }
+            public string IdLiveChat { get; }
+            public string VideoCountLikes { get; }
+            public string VideoCountView { get; } 
+            public VideoData(
+                string videoTitle, 
+                string videoPublishedAt,
+                string idLiveChat,
+                string videoCountLikes,
+                string videoCountView)
+            {
+                VideoTitle = videoTitle;
+                VideoPublishedAt = videoPublishedAt;
+                IdLiveChat = idLiveChat;
+                VideoCountLikes = videoCountLikes;
+                VideoCountView = videoCountView;
+            }
+           
         }
     }
 }
