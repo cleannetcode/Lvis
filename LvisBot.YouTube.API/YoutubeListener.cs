@@ -82,15 +82,14 @@ namespace LvisBot.YouTube.API
             return result;
         }
 
-        private List<YTMessageResponse> GetListCommentsVideo(string idLiveChat)
+        private List<YTMessageResponse> GetListCommentsVideo(string idLiveChat, DateTime startStream)
         {
             var RequestLiveChatData = _youTubeService.LiveChatMessages.List(idLiveChat,"snippet,AuthorDetails");
                 
             var ResponseLiveChatData = RequestLiveChatData.Execute();
 
-            var nextPageToken = ResponseLiveChatData.NextPageToken;
-            
             //pagination via request by chat
+            //var nextPageToken = ResponseLiveChatData.NextPageToken;
             // var totalResult = ResponseLiveChatData.PageInfo.ResultsPerPage;
             // var resultPerPage = ResponseLiveChatData.PageInfo.ResultsPerPage; 
 
@@ -110,8 +109,10 @@ namespace LvisBot.YouTube.API
                     item.AuthorDetails.ChannelId,
                     item.Snippet.DisplayMessage,
                     item.Snippet.PublishedAt.Value,
-                    DateTime.UtcNow,
+                    startStream,
                     userType));
+                
+                //item.AuthorDetails.ProfileImageUrl
             }
 
             return result;
@@ -153,7 +154,7 @@ namespace LvisBot.YouTube.API
                     token.ThrowIfCancellationRequested();
                     
                     DateTime? firstMessageTime = null;                    
-                    var chatMessages = GetListCommentsVideo(videoData.IdLiveChat);
+                    var chatMessages = GetListCommentsVideo(videoData.IdLiveChat,videoData.VideoPublishedAt);
                     
                     if (chatMessages.Count == 0)
                     {
