@@ -175,6 +175,7 @@ namespace LvisBot.YouTube.API
                     {
                         token.ThrowIfCancellationRequested();
                         Console.WriteLine($"{messageResponse.UserName}: {messageResponse.Context}");
+                        var test = messageResponse.UserName;
                         OnMessageReceived?.Invoke(messageResponse);
                     }
                     
