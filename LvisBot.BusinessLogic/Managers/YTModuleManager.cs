@@ -8,18 +8,21 @@ using LvisBot.Domain.Models;
 namespace LvisBot.BusinessLogic.Managers
 {
     // ReSharper disable once InconsistentNaming
-    public class YTModuleManager : ModuleManager<string, YTMessageResponse, StatusResponse, YouTubeConfig>
+    public class YTModuleManager : ModuleManager<string, StatusResponse, YouTubeConfig>
     {
         private readonly char _keyPrefix;
         private readonly YouTubeConfig _ytConfig;
+        private IMemberService _memberService;
         
         public YTModuleManager(ConfigurationService configurationService, 
-            Action<ModuleManager<string, YTMessageResponse, StatusResponse, YouTubeConfig>> configure) : base(configure)
+            Action<ModuleManager<string, StatusResponse, YouTubeConfig>> configure,
+            IMemberService memberService) : base(configure, memberService)
         {
             _keyPrefix = configurationService.ChatKeySymbol;
             _ytConfig = configurationService.YouTubeConfig;
+            _memberService = memberService;
         }
-        public YTModuleManager(ConfigurationService configurationService) : this(configurationService, null) { }
+        public YTModuleManager(ConfigurationService configurationService) : this(configurationService, null, null) { }
         
         public void Run()
         {

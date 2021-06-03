@@ -14,6 +14,7 @@ namespace LvisBot.BusinessLogic.Services
         public YouTubeConfig YouTubeConfig { get; }
         public char ChatKeySymbol { get; }
         public string DateTimeFormat { get; }
+        public string FaleNameMembers { get; }
 
         string settingsAbsPath = Path.Join(Environment.CurrentDirectory, "appsettings.json");
         public ConfigurationService(ISerializationService serializationService)
@@ -30,7 +31,7 @@ namespace LvisBot.BusinessLogic.Services
             ChatKeySymbol = setting.KeyPrefix;
             YouTubeConfig = setting.YouTubeConfig;
             CheckConfigure = setting.CheckConfigure;
-            NewMemberConfigure = setting.NewMemberConfigure;
+            FaleNameMembers = setting.FaleNameMembers;
         }
 
         public SaveModuleConfiguration NewMemberConfigure { get; }

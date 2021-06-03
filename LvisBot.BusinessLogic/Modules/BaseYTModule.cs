@@ -12,7 +12,10 @@ namespace LvisBot.BusinessLogic.Modules
         protected readonly string Path;
         protected abstract string SaveFileFormat { get; }
 
-        public BaseYTModule(IFileService fileService, ISerializationService serializationService, SaveModuleConfiguration moduleConfiguration)
+        public BaseYTModule(
+            IFileService fileService, 
+            ISerializationService serializationService, 
+            SaveModuleConfiguration moduleConfiguration)
         {
             FileService = fileService;
             SerializationService = serializationService;

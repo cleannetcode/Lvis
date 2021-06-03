@@ -25,6 +25,8 @@ namespace LvisBot.CLI
             services.RegisterSingleton<NetService>();
             services.RegisterSingleton<SerializationService>();
             services.RegisterSingleton(b => new TimeService(b.GetObject<ConfigurationService>()));
+            services.RegisterSingleton
+                (b => new MemberService(b.GetObject<FileService>(), b.GetObject<SerializationService>(), b.GetObject<ConfigurationService>()));
 
             services.RegisterSingleton<ISourceListener<YouTubeConfig, YTMessageResponse, StatusResponse>, YoutubeListener>
                 (b => new YoutubeListener(b.GetObject<NetService>(), _logger));
@@ -37,10 +39,6 @@ namespace LvisBot.CLI
 
             services.RegisterSingleton
                 (b => new CheckHandler(b.GetObject<FileService>(), b.GetObject<SerializationService>(), b.GetObject<ConfigurationService>()));
-            
-            
-            services.RegisterSingleton
-                (b => new NewMemberHandler(b.GetObject<FileService>(), b.GetObject<SerializationService>(), b.GetObject<ConfigurationService>()));
 
             services.RegisterSingleton(b => new YTModuleManager(b.GetObject<ConfigurationService>(), m =>
             {
@@ -48,8 +46,7 @@ namespace LvisBot.CLI
                 m.AddModule(b.GetObject<QuestionHandler>);
                 m.AddModule(b.GetObject<TimeCodeHandler>);
                 m.AddModule(b.GetObject<CheckHandler>);
-                m.AddModule(b.GetObject<NewMemberHandler>);
-            }));
+            }, b.GetObject<MemberService>()));
         }
     }
 }

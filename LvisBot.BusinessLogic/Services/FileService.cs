@@ -27,6 +27,22 @@ namespace LvisBot.BusinessLogic.Services
             }
         }
 
+        public string[] ReadAllText(string path)
+        {
+            var path1 = Path.Join(_absBaseFolderPath, path);
+            string[] result;
+            try
+            {
+                result = File.ReadAllLines(path1);
+            }
+            catch
+            {
+                return null;
+            }
+
+            return result;
+        }
+
         private object GetLocker(string path)
         {
             if (fileAcess.TryGetValue(path, out var locker))
