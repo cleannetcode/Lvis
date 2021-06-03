@@ -97,11 +97,11 @@ namespace LvisBot.YouTube.API
             foreach (var item in ResponseLiveChatData.Items)
             {
                 var userType = 
-                    item.AuthorDetails.IsChatOwner.Value ? YTMessageResponse.AuthorTypes.Owner :
-                    item.AuthorDetails.IsChatModerator.Value ? YTMessageResponse.AuthorTypes.Moderator :
-                    item.AuthorDetails.IsVerified.Value ? YTMessageResponse.AuthorTypes.Verified :
-                    item.AuthorDetails.IsChatSponsor.Value ? YTMessageResponse.AuthorTypes.Sponsor :
-                    YTMessageResponse.AuthorTypes.Other;
+                    item.AuthorDetails.IsChatOwner.Value ? AuthorTypes.Owner :
+                    item.AuthorDetails.IsChatModerator.Value ? AuthorTypes.Moderator :
+                    item.AuthorDetails.IsVerified.Value ? AuthorTypes.Verified :
+                    item.AuthorDetails.IsChatSponsor.Value ? AuthorTypes.Sponsor :
+                    AuthorTypes.Other;
 
                 result.Add(new YTMessageResponse(
                     item.Id,
@@ -110,9 +110,8 @@ namespace LvisBot.YouTube.API
                     item.Snippet.DisplayMessage,
                     item.Snippet.PublishedAt.Value,
                     startStream,
-                    userType));
-                
-                //item.AuthorDetails.ProfileImageUrl
+                    userType,
+                    item.AuthorDetails.ProfileImageUrl));
             }
 
             return result;
@@ -175,7 +174,7 @@ namespace LvisBot.YouTube.API
                     {
                         token.ThrowIfCancellationRequested();
                         Console.WriteLine($"{messageResponse.UserName}: {messageResponse.Context}");
-                        var test = messageResponse.UserName;
+                        
                         OnMessageReceived?.Invoke(messageResponse);
                     }
                     

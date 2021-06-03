@@ -92,7 +92,10 @@ namespace LvisBot.BusinessLogic.Managers
             {
                 UserName = mess.UserName,
                 FirstMessage = mess.Context,
-                DateRegistration = mess.UtcTime
+                DateRegistration = mess.UtcTime,
+                ChannelId = mess.ChannelId,
+                UserType = mess.UserType,
+                ProfileImageUrl = mess.ProfileImageUrl
             });
             
             var prefix = GetPrefix(mess);

@@ -195,7 +195,7 @@ namespace LvisBot.YouTube
                             var messageID = chatItem["id"].Value<string>();
                             var value = chatItem["timestampUsec"].Value<long>() / 1000;
                             var utcTime = DateTimeOffset.FromUnixTimeMilliseconds(value).UtcDateTime;
-                            var authorType = YTMessageResponse.AuthorTypes.None;
+                            var authorType = AuthorTypes.None;
                             foreach (var jbd in chatItem["authorBadges"]?.ToObject<JArray>() ?? new JArray())
                             {
                                 var jjbd = jbd["liveChatAuthorBadgeRenderer"]?.ToObject<JObject>();
@@ -203,18 +203,18 @@ namespace LvisBot.YouTube
                                 {
                                     switch (icon?["iconType"]?.Value<string>())
                                     {
-                                        case "VERIFIED": authorType |= YTMessageResponse.AuthorTypes.Verified; break;
-                                        case "MODERATOR": authorType |= YTMessageResponse.AuthorTypes.Moderator; break;
-                                        case "OWNER": authorType |= YTMessageResponse.AuthorTypes.Owner; break;
-                                        default: authorType |= YTMessageResponse.AuthorTypes.Other; break;
+                                        case "VERIFIED": authorType |= AuthorTypes.Verified; break;
+                                        case "MODERATOR": authorType |= AuthorTypes.Moderator; break;
+                                        case "OWNER": authorType |= AuthorTypes.Owner; break;
+                                        default: authorType |= AuthorTypes.Other; break;
                                     }
                                 }
-                                else authorType |= YTMessageResponse.AuthorTypes.Sponsor;
+                                else authorType |= AuthorTypes.Sponsor;
                             }
                             if (lastMessageId == null && utcTime < utcInit) continue;
                             if (firstMessageId == null) firstMessageId = messageID;
                             if (lastMessageId == messageID) break;
-                            messageResponses.Add(new YTMessageResponse(messageID, authorName, authorID, message, utcTime, startTime, authorType));
+                            messageResponses.Add(new YTMessageResponse(messageID, authorName, authorID, message, utcTime, startTime, authorType,null));
                         }
                         catch (Exception ex)
                         {
