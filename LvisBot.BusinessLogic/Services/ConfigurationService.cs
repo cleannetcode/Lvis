@@ -30,6 +30,9 @@ namespace LvisBot.BusinessLogic.Services
             ChatKeySymbol = setting.KeyPrefix;
             YouTubeConfig = setting.YouTubeConfig;
             CheckConfigure = setting.CheckConfigure;
+            NewMemberConfigure = setting.NewMemberConfigure;
         }
+
+        public SaveModuleConfiguration NewMemberConfigure { get; }
     }
 }

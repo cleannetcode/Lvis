@@ -9,5 +9,7 @@
         public SaveModuleConfiguration TimeCodeConfigure { get; set; }
         public SaveModuleConfiguration QuestionConfigure { get; set; }
         public SaveModuleConfiguration CheckConfigure { get; set; }
+        
+        public SaveModuleConfiguration NewMemberConfigure { get; set; }
     }
 }
